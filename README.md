@@ -1,4 +1,4 @@
-# Junior Astronaut Mission Trainer
+# AstroBase-Moon-Mars-Survival-Simulator
 
 An interactive space mission simulation developed for
 NASA Space Apps Challenge 2026.
