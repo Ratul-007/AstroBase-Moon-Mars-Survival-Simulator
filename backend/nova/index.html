@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090d18">
+  <title>Nova — Mission Companion</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/nova-bot.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="starfield" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="Nova home"><span class="brand-mark">✦</span><span>NOVA <small>MISSION COMPANION</small></span></a>
+    <nav aria-label="Main navigation">
+      <a href="#moon">Moon</a><a href="#mars">Mars</a><a href="#nasa-data">NASA data</a><a href="#controls">Mission lab</a>
+    </nav>
+    <div id="runtime-status" class="status"><span class="status-dot"></span><span>Checking AI…</span></div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="eyebrow"><span class="live-dot"></span> YOUR NEXT FRONTIER STARTS HERE</div>
+      <h1>One small step.<br><span>One giant adventure.</span></h1>
+      <p class="hero-copy">Explore mission ideas for the Moon and Mars. Nova is your friendly onboard companion for questions, quick facts, and a guided tour.</p>
+      <div class="hero-actions"><button class="primary" id="open-nova">Meet Nova <span aria-hidden="true">↗</span></button><a class="text-link" href="#destinations">Explore destinations <span aria-hidden="true">↓</span></a></div>
+      <div class="hero-orbit" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="planet planet-moon"></div><div class="planet planet-mars"></div><div class="orbit-label label-moon">MOON / 384,400 KM</div><div class="orbit-label label-mars">MARS / RED PLANET</div></div>
+      <div class="hero-foot"><span>01 / THE SOLAR SYSTEM</span><span>LOCAL-FIRST AI · ONLINE WHEN NEEDED</span></div>
+    </section>
+
+    <section id="destinations" class="section">
+      <div class="section-head"><div><span class="eyebrow">CHOOSE YOUR DESTINATION</span><h2>Two worlds. Different challenges.</h2></div><p>Explore the constraints that shape each mission.</p></div>
+      <div class="destination-grid">
+        <article id="moon" class="destination-card moon-card">
+          <div class="card-top"><span class="tag">DESTINATION 01</span><span class="distance">~3 DAYS</span></div>
+          <div class="moon-art" aria-hidden="true"><div class="moon-disc"><i></i><i></i><i></i><i></i></div><span class="art-ring"></span></div>
+          <div class="card-content"><h3>The Moon</h3><p>A nearby proving ground with low gravity, extreme temperature swings, and permanently shadowed regions that may hold water ice.</p><div class="fact-row"><span><b>1/6</b><small>Earth gravity</small></span><span><b>1.3 s</b><small>Light-time, one way</small></span><span><b>14 days</b><small>Approx. daylight</small></span></div><button class="secondary ask-topic" data-question="Tell me about Moon missions">Ask Nova about the Moon <span>→</span></button></div>
+        </article>
+        <article id="mars" class="destination-card mars-card">
+          <div class="card-top"><span class="tag">DESTINATION 02</span><span class="distance">6–9 MONTHS</span></div>
+          <div class="mars-art" aria-hidden="true"><div class="mars-disc"><i></i><i></i><i></i></div><span class="art-ring"></span></div>
+          <div class="card-content"><h3>Mars</h3><p>A long-duration mission with thin carbon-dioxide air, radiation exposure, dusty weather, and communication delays measured in minutes.</p><div class="fact-row"><span><b>0.38 g</b><small>Earth gravity</small></span><span><b>3–22 min</b><small>Light-time, one way</small></span><span><b>687 days</b><small>Martian year</small></span></div><button class="secondary ask-topic" data-question="What are the biggest challenges of a Mars mission?">Ask Nova about Mars <span>→</span></button></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="nasa-data" class="section nasa-section">
+      <div class="section-head"><div><span class="eyebrow">REAL NASA DATA</span><h2>Space, updated from NASA.</h2></div><p>Live astronomy imagery and near-Earth object data, requested through Nova's backend.</p></div>
+      <div class="nasa-grid">
+        <article class="nasa-panel apod-panel">
+          <div class="nasa-panel-head"><div><span class="tag">DAILY FEATURE</span><h3>Astronomy Picture of the Day</h3></div><button type="button" class="nasa-refresh" id="refresh-apod">Refresh ↻</button></div>
+          <p class="nasa-state" id="apod-state" role="status">Loading NASA's astronomy feature…</p>
+          <div id="apod-content" class="apod-content" hidden>
+            <a id="apod-image-link" class="apod-image-link" href="https://science.nasa.gov/solar-system/" target="_blank" rel="noopener noreferrer" hidden><img id="apod-image" alt="" loading="lazy"></a>
+            <div class="apod-copy"><p class="apod-date" id="apod-date"></p><h4 id="apod-title"></h4><p id="apod-explanation" class="apod-explanation"></p><p id="apod-credit" class="apod-credit"></p><a id="apod-source" class="nasa-text-link" href="https://science.nasa.gov/solar-system/" target="_blank" rel="noopener noreferrer">View on NASA ↗</a></div>
+          </div>
+        </article>
+        <article class="nasa-panel asteroid-panel">
+          <div class="nasa-panel-head"><div><span class="tag">NEXT THREE DAYS</span><h3>Near-Earth asteroids</h3></div><button type="button" class="nasa-refresh" id="refresh-asteroids">Refresh ↻</button></div>
+          <p class="nasa-state" id="asteroid-state" role="status">Checking NASA/JPL data…</p>
+          <div id="asteroid-content" hidden><p class="asteroid-summary" id="asteroid-summary"></p><div id="asteroid-list" class="asteroid-list"></div><a class="nasa-text-link" href="https://cneos.jpl.nasa.gov/ca/" target="_blank" rel="noopener noreferrer">Explore NASA/JPL close approaches ↗</a></div>
+          <p class="asteroid-note">A “potentially hazardous” classification is not, by itself, a prediction that an object will hit Earth.</p>
+        </article>
+      </div>
+      <p class="nasa-disclaimer">Data provided by NASA and NASA/JPL. Online connection required for refresh. Nova keeps its prepared Moon/Mars answers available offline.</p>
+    </section>
+
+    <section id="controls" class="section mission-lab">
+      <div class="section-head"><div><span class="eyebrow">MISSION CONTROL</span><h2>Sketch a mission plan.</h2></div><p>This starter demonstrates the UI integration. It is not yet a physics-accurate mission simulator.</p></div>
+      <form id="mission-form" class="mission-form">
+        <label>Destination<select id="destination-select"><option value="Moon">Moon</option><option value="Mars">Mars</option></select></label>
+        <label>Crew size<input id="crew-size" type="number" min="1" max="12" value="4" required></label>
+        <label>Mission duration (days)<input id="mission-days" type="number" min="1" max="1200" value="14" required></label>
+        <button class="primary" type="submit">Generate mission brief <span aria-hidden="true">↗</span></button>
+      </form>
+      <div id="results" class="results" aria-live="polite"><div class="result-icon">✦</div><div><span class="eyebrow">MISSION BRIEF</span><h3>Waiting for your parameters</h3><p>Choose a destination, crew size, and duration to generate a starter brief. Ask Nova to explain the trade-offs.</p></div></div>
+    </section>
+
+    <section class="closing"><span class="eyebrow">YOUR COMPANION IS READY</span><h2>Curiosity is mission-critical.</h2><p>Say hello, ask a question, or ask Nova to show you around.</p><button class="primary" id="start-tour">Start the guided tour <span aria-hidden="true">→</span></button></section>
+  </main>
+  <footer><span>✦ NOVA / OFFLINE-FIRST MISSION GUIDE</span><span>Educational concept demo · Verify mission-critical facts with authoritative sources.</span></footer>
+</body>
+</html>
