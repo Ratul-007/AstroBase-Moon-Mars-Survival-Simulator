@@ -1,0 +1,630 @@
+/* =========================================================
+   ASTROBASE — SURVIVAL HUD
+   Responsive mission-control styling
+   ========================================================= */
+
+.sz-hud {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+/* =========================================================
+   SUIT STATUS PANEL
+   ========================================================= */
+
+.sz-panel {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 103;
+  width: min(278px, calc(100vw - 32px));
+  box-sizing: border-box;
+  padding: 15px;
+  color: #eef6ff;
+  background: linear-gradient(
+    145deg,
+    rgba(16, 31, 54, 0.96),
+    rgba(5, 12, 27, 0.96)
+  );
+  border: 1px solid rgba(125, 211, 252, 0.34);
+  border-radius: 14px;
+  box-shadow:
+    0 12px 34px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.sz-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 15px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  color: #bae6fd;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.7px;
+}
+
+.sz-live-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 12px rgba(74, 222, 128, 0.55);
+}
+
+.sz-status-danger .sz-live-dot {
+  background: #fbbf24;
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.65);
+}
+
+.sz-status-critical .sz-live-dot,
+.sz-status-failed .sz-live-dot {
+  background: #f87171;
+  box-shadow: 0 0 12px rgba(248, 113, 113, 0.7);
+}
+
+/* =========================================================
+   RESOURCE METERS
+   ========================================================= */
+
+.sz-meter {
+  min-width: 0;
+}
+
+.sz-meter + .sz-meter {
+  margin-top: 14px;
+}
+
+.sz-meter-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+  color: #dbe7f7;
+  font-size: 12px;
+}
+
+.sz-num {
+  color: #f8fafc;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.sz-track {
+  width: 100%;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.18);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.sz-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition: width 220ms ease, background-color 220ms ease;
+}
+
+.sz-oxygen {
+  background: linear-gradient(90deg, #0284c7, #38bdf8, #7dd3fc);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+}
+
+.sz-health {
+  background: linear-gradient(90deg, #16a34a, #4ade80);
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.22);
+}
+
+.sz-warn {
+  background: linear-gradient(90deg, #d97706, #fbbf24);
+}
+
+.sz-bad {
+  background: linear-gradient(90deg, #b91c1c, #ef4444);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+/* =========================================================
+   SAFE-ZONE WARNING
+   ========================================================= */
+
+.sz-alert {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 102;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: max-content;
+  max-width: min(620px, calc(100vw - 330px));
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 13px 16px;
+  color: #fff7f7;
+  background: linear-gradient(
+    135deg,
+    rgba(91, 26, 31, 0.97),
+    rgba(48, 13, 20, 0.97)
+  );
+  border: 1px solid rgba(248, 113, 113, 0.6);
+  border-radius: 13px;
+  box-shadow:
+    0 12px 34px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.sz-alert-icon {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 27px;
+  border-radius: 9px;
+  color: #7f1d1d;
+  background: #fecaca;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.sz-alert-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.sz-alert-content strong {
+  color: #fecaca;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+
+.sz-distance {
+  margin-top: 2px;
+  color: #fde68a;
+  font-weight: 800;
+}
+
+.sz-alert-critical {
+  border-color: rgba(239, 68, 68, 0.9);
+  background: linear-gradient(
+    135deg,
+    rgba(91, 10, 10, 0.98),
+    rgba(42, 8, 12, 0.98)
+  );
+  animation: sz-critical-pulse 1.4s ease-in-out infinite alternate;
+}
+
+.sz-alert-failed {
+  border-color: #ef4444;
+  background: rgba(69, 10, 10, 0.98);
+}
+
+/* =========================================================
+   SURVIVAL VIGNETTE
+   ========================================================= */
+
+.sz-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 45%,
+    rgba(127, 29, 29, 0.08) 72%,
+    rgba(127, 29, 29, 0.3) 100%
+  );
+  pointer-events: none;
+}
+
+.sz-status-critical .sz-vignette,
+.sz-status-failed .sz-vignette {
+  background: radial-gradient(
+    ellipse at center,
+    transparent 34%,
+    rgba(127, 29, 29, 0.16) 64%,
+    rgba(127, 29, 29, 0.5) 100%
+  );
+}
+
+@keyframes sz-critical-pulse {
+  from {
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  }
+
+  to {
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.3);
+  }
+}
+
+/* =========================================================
+   MISSION DASHBOARD OVERLAY — DESKTOP
+   ========================================================= */
+
+.mission-dashboard-overlay {
+  display: none; /* closed by default on every screen size */
+  position: absolute;
+  z-index: 15;
+  top: 166px;
+  right: 16px;
+  bottom: 78px;
+  width: min(380px, calc(100vw - 32px));
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid rgba(125, 211, 252, 0.24);
+  border-radius: 16px;
+  background: rgba(5, 12, 26, 0.91);
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(125, 211, 252, 0.35) transparent;
+}
+
+.mission-dashboard-overlay::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mission-dashboard-overlay::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mission-dashboard-overlay::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(125, 211, 252, 0.3);
+}
+
+/* Keep the dashboard and its descendants sized predictably. */
+.mission-dashboard-overlay,
+.mission-dashboard-overlay * {
+  box-sizing: border-box;
+}
+
+.mission-dashboard-overlay .mission-dashboard {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Open state (toggled by the Mission button on desktop and mobile). */
+.mission-dashboard-overlay.mobile-dashboard-open {
+  display: block;
+}
+
+/* =========================================================
+   MISSION TOGGLE BUTTON (desktop base; mobile overrides below)
+   ========================================================= */
+
+.mobile-mission-toggle {
+  position: absolute;
+  z-index: 31;
+  left: 16px;
+  bottom: 100px; /* sits above the controls hint card */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(125, 211, 252, 0.48);
+  border-radius: 12px;
+  background: rgba(7, 18, 37, 0.94);
+  color: #eaf6ff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.mobile-mission-toggle:hover {
+  border-color: rgba(125, 211, 252, 0.8);
+}
+
+.mobile-mission-toggle:active {
+  transform: scale(0.97);
+}
+
+.mobile-mission-toggle:focus-visible {
+  outline: 2px solid #7dd3fc;
+  outline-offset: 3px;
+}
+
+/* =========================================================
+   TABLET AND NARROW DESKTOP
+   ========================================================= */
+
+@media (min-width: 621px) and (max-width: 1000px) {
+  .sz-panel {
+    width: 250px;
+  }
+
+  .sz-alert {
+    max-width: calc(100vw - 300px);
+  }
+
+  .mission-dashboard-overlay {
+    top: 164px;
+    right: 12px;
+    bottom: 76px;
+    width: min(350px, calc(100vw - 24px));
+  }
+}
+
+/* =========================================================
+   MOBILE HUD
+   ========================================================= */
+
+@media (max-width: 620px) {
+  .sz-panel {
+    top: 10px;
+    right: 10px;
+    /* narrower so the top-left title card has room */
+    width: min(158px, calc(100vw - 20px));
+    padding: 10px 11px;
+    border-radius: 12px;
+  }
+
+  .sz-panel-title {
+    gap: 7px;
+    margin-bottom: 9px;
+    padding-bottom: 8px;
+    font-size: 9px;
+    letter-spacing: 1.2px;
+  }
+
+  .sz-live-dot {
+    width: 7px;
+    height: 7px;
+    flex-basis: 7px;
+  }
+
+  .sz-meter-head {
+    gap: 8px;
+    margin-bottom: 5px;
+    font-size: 10px;
+  }
+
+  .sz-meter + .sz-meter {
+    margin-top: 9px;
+  }
+
+  .sz-track {
+    height: 6px;
+  }
+
+  .sz-alert {
+    top: 122px;
+    left: 10px;
+    transform: none;
+    width: calc(100vw - 20px);
+    max-width: none;
+    padding: 10px 12px;
+    border-radius: 11px;
+  }
+
+  .sz-alert-icon {
+    width: 24px;
+    height: 24px;
+    flex-basis: 24px;
+  }
+
+  .sz-alert-content {
+    font-size: 11px;
+  }
+
+  .sz-alert-content strong {
+    font-size: 9px;
+  }
+
+  /* Closed by default; opened by the Mission button. */
+  .mission-dashboard-overlay {
+    position: fixed;
+    z-index: 30;
+    top: 174px;
+    left: 10px;
+    right: 10px;
+    /* leaves room for the Mission toggle + controls hint below */
+    bottom: calc(116px + env(safe-area-inset-bottom, 0px));
+    width: auto;
+    min-width: 0;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 13px;
+  }
+
+  .mission-dashboard-overlay.mobile-dashboard-open {
+    display: block;
+  }
+
+  /* The dashboard itself must never exceed the viewport width. */
+  .mission-dashboard-overlay .mission-dashboard {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 12px !important;
+  }
+
+  .mission-dashboard-overlay .mission-dashboard * {
+    box-sizing: border-box;
+    min-width: 0;
+  }
+
+  /* Stack the main event area and score/objective sidebar. */
+  .mission-dashboard-overlay .mission-dashboard > div {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 14px !important;
+    align-items: stretch !important;
+  }
+
+  .mission-dashboard-overlay .mission-dashboard section,
+  .mission-dashboard-overlay .mission-dashboard article,
+  .mission-dashboard-overlay .mission-dashboard aside {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Compact cards without changing their content. */
+  .mission-dashboard-overlay .mission-dashboard section {
+    padding: 14px !important;
+  }
+
+  /* Keep event choices readable and easy to tap. */
+  .mission-dashboard-overlay .mission-dashboard button {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+    touch-action: manipulation;
+  }
+
+  .mission-dashboard-overlay .mission-dashboard button strong,
+  .mission-dashboard-overlay .mission-dashboard button span {
+    overflow-wrap: anywhere;
+  }
+
+  /* Prevent the score/objective sidebar from sticking over other cards. */
+  .mission-dashboard-overlay .mission-dashboard aside[style*="position: sticky"] {
+    position: static !important;
+    top: auto !important;
+  }
+
+  /* Mission toggle: smaller, sits above the compact controls hint. */
+  .mobile-mission-toggle {
+    left: 12px;
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    gap: 7px;
+    min-height: 40px;
+    padding: 0 13px;
+    font-size: 12px;
+  }
+}
+
+/* Narrow phones: use a single column for resource and impact cards. */
+@media (max-width: 380px) {
+  .mission-dashboard-overlay .mission-dashboard
+    div[style*="grid-template-columns"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .sz-panel {
+    width: min(145px, calc(100vw - 20px));
+  }
+}
+
+/* =========================================================
+   VERY SHORT DESKTOP VIEWPORTS
+   ========================================================= */
+
+@media (max-height: 620px) and (min-width: 621px) {
+  .sz-panel {
+    top: 8px;
+    padding: 10px 12px;
+  }
+
+  .sz-panel-title {
+    margin-bottom: 8px;
+    padding-bottom: 7px;
+  }
+
+  .sz-meter + .sz-meter {
+    margin-top: 8px;
+  }
+
+  .mission-dashboard-overlay {
+    top: 140px;
+    bottom: 58px;
+  }
+}
+
+/* =========================================================
+   ACCESSIBILITY
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .sz-alert-critical {
+    animation: none;
+  }
+
+  .sz-fill {
+    transition: none;
+  }
+}
+
+/* =========================================================
+   3D SCENE HUD — MOBILE (title card, controls hint, task chip)
+   ========================================================= */
+
+@media (max-width: 620px) {
+  /* "// 3D ENVIRONMENT" and "World radius" are hidden on phones */
+  .scene-hide-mobile {
+    display: none !important;
+  }
+
+  /* Smaller title card so it never touches the Suit Status panel */
+  .scene-title-card {
+    top: 10px !important;
+    left: 10px !important;
+    max-width: calc(100vw - 190px) !important;
+    padding: 8px 10px !important;
+  }
+
+  .scene-title-card div:nth-child(2) {
+    font-size: 15px !important;
+  }
+
+  /* Compact controls hint */
+  .scene-controls-hint {
+    left: 10px !important;
+    bottom: 10px !important;
+    padding: 6px 9px !important;
+    font-size: 10px !important;
+    line-height: 1.35;
+    max-width: calc(100vw - 150px) !important;
+  }
+
+  .scene-safe-chip {
+    right: 10px !important;
+    bottom: 10px !important;
+    padding: 6px 9px !important;
+  }
+
+  /* Objective chip sits above the interaction prompt on small screens */
+  .scene-objective {
+    bottom: 150px !important;
+    max-width: calc(100% - 20px) !important;
+    padding: 8px 12px !important;
+  }
+}

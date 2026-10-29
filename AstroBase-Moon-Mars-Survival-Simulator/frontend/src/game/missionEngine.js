@@ -1,3 +1,4 @@
+import { attachTask } from "./missionTasks";
 
 export const RESOURCE_META = {
   power: { label: "Power", unit: "%", color: "#f5c451" },
@@ -317,8 +318,10 @@ function buildEvents(environment) {
   );
 }
 
-export const MOON_EVENTS = buildEvents("moon");
-export const MARS_EVENTS = buildEvents("mars");
+// attachTask adds a 3D field task to events that have one (see missionTasks.js).
+// All other events are returned unchanged.
+export const MOON_EVENTS = buildEvents("moon").map(attachTask);
+export const MARS_EVENTS = buildEvents("mars").map(attachTask);
 export const MISSION_EVENTS = MOON_EVENTS;
 
 export const INITIAL_OBJECTIVES = [
