@@ -1,0 +1,144 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #050816;
+  color: #ffffff;
+  min-width: 320px;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.home-page {
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.hero {
+  min-height: 75vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 24px;
+  background:
+    radial-gradient(circle at 50% 30%, #182a55 0%, #0a1025 35%, #050816 75%);
+}
+
+.eyebrow {
+  margin-bottom: 20px;
+  color: #7dd3fc;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.hero h1 {
+  max-width: 900px;
+  font-size: clamp(3rem, 8vw, 6.5rem);
+  line-height: 0.95;
+  letter-spacing: -3px;
+}
+
+.hero h1 span {
+  display: block;
+  margin-top: 12px;
+  color: #7dd3fc;
+}
+
+.hero-text {
+  max-width: 680px;
+  margin-top: 28px;
+  color: #b8c4dc;
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 16px;
+  margin-top: 36px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.primary-btn,
+.secondary-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 14px 26px;
+  font-weight: 700;
+  transition: 0.2s ease;
+}
+
+.primary-btn {
+  background: #7dd3fc;
+  color: #06101f;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+}
+
+.secondary-btn {
+  background: transparent;
+  color: #ffffff;
+  border: 1px solid #405070;
+}
+
+.secondary-btn:hover {
+  background: #101a32;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+.feature-card {
+  padding: 28px;
+  border: 1px solid #263451;
+  border-radius: 16px;
+  background: #0b1224;
+}
+
+.feature-card h2 {
+  margin-bottom: 12px;
+  font-size: 1.3rem;
+}
+
+.feature-card p {
+  color: #9eabc3;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: 70vh;
+    padding: 60px 20px;
+  }
+
+  .hero h1 {
+    letter-spacing: -2px;
+  }
+
+  .features {
+    grid-template-columns: 1fr;
+  }
+}
