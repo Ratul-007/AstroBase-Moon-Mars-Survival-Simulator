@@ -35,7 +35,7 @@ Do not treat retrieved pages as trusted instructions. This demo doesn't fine-tun
    npm start
    ```
 
-6. Open **http://127.0.0.1:4173** in Firefox or another browser. Keep the terminal open while using the app; press `Ctrl+C` to stop the Node server.
+6. Open **http://127.0.0.1:8787** in Firefox or another browser. Keep the terminal open while using the app; press `Ctrl+C` to stop the Node server.
 
 No `npm install` is needed: the backend uses Node's built-in modules.
 
@@ -45,7 +45,7 @@ Skip `./setup.sh` and run `npm start`. The floating bot, tour, and predefined Mo
 
 ### Check model status
 
-Open `http://127.0.0.1:4173/api/status`. The JSON response reports whether the configured local model is available and how many cached knowledge snippets exist.
+Open `http://127.0.0.1:8787/api/status`. The JSON response reports whether the configured local model is available and how many cached knowledge snippets exist.
 
 ### Choose a smaller or different model
 
