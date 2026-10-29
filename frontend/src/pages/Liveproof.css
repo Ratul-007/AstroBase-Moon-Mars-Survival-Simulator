@@ -1,0 +1,588 @@
+/* LIVE PROOF PAGE: transparent so the fixed space background shows through */
+
+.liveproof-page {
+  --lp-border: rgba(151, 180, 214, 0.19);
+  --lp-panel: rgba(11, 18, 30, 0.84);
+  --lp-text: #edf4fc;
+  --lp-muted: #9aaabd;
+  --lp-accent: #8bdcff;
+
+  min-height: 100vh;
+  padding: 0 clamp(18px, 5vw, 76px) 40px;
+  color: var(--lp-text);
+  background: transparent;
+  font-family: "DM Sans", sans-serif;
+}
+
+.liveproof-page *,
+.liveproof-page *::before,
+.liveproof-page *::after {
+  box-sizing: border-box;
+}
+
+.liveproof-header {
+  display: flex;
+  min-height: 82px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid var(--lp-border);
+}
+
+.liveproof-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.liveproof-brand-mark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(139, 220, 255, 0.6);
+  border-radius: 11px;
+  color: var(--lp-accent);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.liveproof-brand strong,
+.liveproof-brand small {
+  display: block;
+}
+
+.liveproof-brand strong {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.12em;
+}
+
+.liveproof-brand small {
+  margin-top: 5px;
+  color: var(--lp-muted);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.07em;
+}
+
+.liveproof-live {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #aabbd0;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.liveproof-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: #79d8a1;
+  box-shadow: 0 0 12px rgba(121, 216, 161, 0.5);
+}
+
+.liveproof-intro {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: clamp(44px, 7vw, 80px) 0 36px;
+  text-align: center;
+}
+
+.liveproof-eyebrow {
+  margin: 0;
+  color: var(--lp-accent);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+}
+
+.liveproof-intro h1 {
+  margin: 22px 0 16px;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(36px, 5.6vw, 66px);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.055em;
+}
+
+.liveproof-intro h1 span {
+  color: var(--lp-accent);
+}
+
+.liveproof-lead {
+  max-width: 600px;
+  margin: 0 auto;
+  color: #aab8c9;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.liveproof-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.liveproof-toggle {
+  display: inline-flex;
+  padding: 4px;
+  border: 1px solid var(--lp-border);
+  border-radius: 9px;
+  background: var(--lp-panel);
+}
+
+.liveproof-toggle button,
+.liveproof-reload,
+.liveproof-footer button,
+.liveproof-error button {
+  font-family: "DM Sans", sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.liveproof-toggle button {
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #b4c3d6;
+  font-size: 13px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.liveproof-toggle button.is-active {
+  background: rgba(139, 220, 255, 0.16);
+  color: #fff;
+}
+
+.liveproof-reload {
+  padding: 12px 20px;
+  border: 1px solid var(--lp-accent);
+  border-radius: 9px;
+  background: var(--lp-accent);
+  color: #07111d;
+  font-size: 13px;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.liveproof-reload:hover {
+  background: #bdeaff;
+  transform: translateY(-2px);
+}
+
+.liveproof-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  max-width: 1320px;
+  margin: 0 auto 22px;
+}
+
+.liveproof-card {
+  min-width: 0;
+  padding: 26px;
+  border: 1px solid var(--lp-border);
+  border-radius: 14px;
+  background: var(--lp-panel);
+}
+
+.liveproof-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 18px;
+  color: #8ca6c3;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.liveproof-card h2 {
+  margin: 0 0 10px;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(22px, 2.6vw, 28px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.liveproof-muted {
+  margin: 0 0 18px;
+  color: var(--lp-muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.liveproof-placeholder,
+.liveproof-error {
+  padding: 22px;
+  border: 1px dashed var(--lp-border);
+  border-radius: 10px;
+  color: var(--lp-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.liveproof-error {
+  border-color: rgba(255, 150, 120, 0.4);
+  color: #ffc9b8;
+}
+
+.liveproof-error button {
+  padding: 4px 10px;
+  border: 1px solid currentColor;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+}
+
+.liveproof-figure {
+  margin: 0 0 18px;
+}
+
+.liveproof-figure img {
+  display: block;
+  width: 100%;
+  max-height: 340px;
+  border: 1px solid var(--lp-border);
+  border-radius: 10px;
+  object-fit: cover;
+  background: #0a111c;
+}
+
+.liveproof-figure figcaption {
+  margin-top: 8px;
+  color: #7589a1;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.liveproof-facts {
+  margin: 0 0 18px;
+  border-top: 1px solid var(--lp-border);
+}
+
+.liveproof-facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--lp-border);
+}
+
+.liveproof-facts dt {
+  flex-shrink: 0;
+  color: #7f93ab;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+
+.liveproof-facts dd {
+  min-width: 0;
+  margin: 0;
+  color: #e6eef8;
+  font-size: 13px;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.liveproof-outcome {
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--lp-border);
+  border-radius: 10px;
+}
+
+.liveproof-outcome.is-alert {
+  border-color: rgba(243, 185, 101, 0.4);
+  background: rgba(243, 185, 101, 0.07);
+}
+
+.liveproof-outcome.is-clear {
+  border-color: rgba(121, 216, 161, 0.35);
+  background: rgba(121, 216, 161, 0.06);
+}
+
+.liveproof-outcome strong {
+  display: block;
+  font-size: 14px;
+}
+
+.liveproof-outcome p {
+  margin: 8px 0;
+  color: #b4c3d6;
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+.liveproof-outcome small {
+  color: #7f93ab;
+  font-size: 11px;
+}
+
+.liveproof-link {
+  display: inline-block;
+  color: var(--lp-accent);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.liveproof-link:hover {
+  text-decoration: underline;
+}
+
+.liveproof-raw {
+  margin-top: 16px;
+}
+
+.liveproof-raw summary {
+  color: #9db3cc;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.liveproof-raw pre {
+  max-height: 280px;
+  margin: 10px 0 0;
+  padding: 14px;
+  overflow: auto;
+  border: 1px solid var(--lp-border);
+  border-radius: 8px;
+  background: rgba(3, 7, 16, 0.8);
+  color: #a9c3de;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.liveproof-log {
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.liveproof-table-wrap {
+  overflow-x: auto;
+}
+
+.liveproof-log table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.liveproof-log th {
+  padding: 10px 12px 10px 0;
+  border-bottom: 1px solid var(--lp-border);
+  color: #7f93ab;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-align: left;
+}
+
+.liveproof-log td {
+  padding: 12px 12px 12px 0;
+  border-bottom: 1px solid rgba(151, 180, 214, 0.1);
+  color: #cbd8e8;
+  vertical-align: top;
+}
+
+.liveproof-url {
+  max-width: 460px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.liveproof-url a {
+  color: #9bcff0;
+  text-decoration: none;
+}
+
+.liveproof-url a:hover {
+  text-decoration: underline;
+}
+
+.liveproof-ok {
+  color: #79d8a1;
+  font-weight: 700;
+}
+
+.liveproof-bad {
+  color: #ff9a82;
+  font-weight: 700;
+}
+
+.liveproof-verify {
+  margin-top: 24px;
+  padding: 18px 20px;
+  border: 1px solid var(--lp-border);
+  border-radius: 10px;
+  background: rgba(139, 220, 255, 0.04);
+}
+
+.liveproof-verify h3 {
+  margin: 0 0 10px;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 16px;
+}
+
+.liveproof-verify ol {
+  margin: 0;
+  padding-left: 20px;
+  color: #b4c3d6;
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+.liveproof-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  max-width: 1320px;
+  margin: 28px auto 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--lp-border);
+}
+
+.liveproof-footer button {
+  padding: 11px 18px;
+  border: 1px solid var(--lp-border);
+  border-radius: 8px;
+  background: transparent;
+  color: #dce7f5;
+  font-size: 13px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.liveproof-footer button:hover {
+  border-color: var(--lp-accent);
+  background: rgba(139, 220, 255, 0.08);
+}
+
+.liveproof-footer p {
+  margin: 0;
+  color: #64768b;
+  font-size: 11px;
+}
+
+.liveproof-brand:focus-visible,
+.liveproof-toggle button:focus-visible,
+.liveproof-reload:focus-visible,
+.liveproof-footer button:focus-visible,
+.liveproof-link:focus-visible,
+.liveproof-raw summary:focus-visible {
+  outline: 2px solid var(--lp-accent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+  .liveproof-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .liveproof-header {
+    min-height: 72px;
+  }
+
+  .liveproof-live {
+    max-width: 130px;
+    font-size: 8px;
+    line-height: 1.6;
+  }
+
+  .liveproof-card {
+    padding: 20px 16px;
+  }
+
+  .liveproof-toggle {
+    width: 100%;
+  }
+
+  .liveproof-toggle button {
+    flex: 1;
+    padding: 10px 8px;
+  }
+
+  .liveproof-reload {
+    width: 100%;
+  }
+
+  .liveproof-facts > div {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .liveproof-facts dd {
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liveproof-page * {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- Simulation button, simulated outcome, notes ---------- */
+
+.liveproof-outcome.is-sim {
+  border-color: rgba(190, 160, 255, 0.45);
+  background: rgba(150, 120, 255, 0.08);
+}
+
+.liveproof-sim {
+  display: block;
+  margin: 0 0 16px;
+  padding: 9px 14px;
+  border: 1px dashed rgba(190, 160, 255, 0.55);
+  border-radius: 7px;
+  background: transparent;
+  color: #d7c9ff;
+  font-family: "DM Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.liveproof-sim:hover,
+.liveproof-sim[aria-pressed="true"] {
+  background: rgba(150, 120, 255, 0.14);
+}
+
+.liveproof-sim:focus-visible {
+  outline: 2px solid var(--lp-accent);
+  outline-offset: 3px;
+}
+
+.liveproof-note {
+  margin: 18px 0 0;
+  color: #7f93ab;
+  font-size: 12px;
+  line-height: 1.7;
+}
