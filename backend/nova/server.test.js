@@ -113,6 +113,67 @@ async function run() {
     assert.match(state.body.reply, /power 12/i);
     assert.doesNotMatch(state.body.reply, /can't read your live numbers/i);
 
+    const frontendPayloadShape = await request({
+      message: "[Current mission: Moon] What happens on the 3rd day?",
+      state: {
+        mission: "moon",
+        campaignDays: 20,
+        day: 3,
+        score: 12,
+        resources: { power: 80, water: 80, food: 80, oxygen: 80, shielding: 80 },
+        objectives: { total: 3, done: 1 },
+        missionStatus: "active",
+        currentEvent: {
+          id: "moon-03",
+          day: 3,
+          title: "Solar Array Dust Buildup",
+          description: "Dust is reducing solar power.",
+          type: "power",
+          severity: "warning",
+          choices: [],
+          task: {
+            title: "Service the solar array",
+            steps: [{ action: "Clean the panels" }],
+          },
+        },
+        taskProgress: { eventId: "moon-03", stepIndex: 0 },
+        survival: { oxygen: 80, health: 100, inZone: true, status: "safe" },
+      },
+    });
+    assert.equal(frontendPayloadShape.statusCode, 200);
+    assert.equal(frontendPayloadShape.body.source, "mission-rules");
+    assert.match(frontendPayloadShape.body.reply, /Day 3 tasks: "Service the solar array"/);
+
+    const messageOnly = await request({
+      message: "What happens on the 3rd day?",
+    });
+    assert.equal(messageOnly.statusCode, 200);
+    assert.equal(messageOnly.body.source, "mission-rules");
+    assert.match(messageOnly.body.reply, /Day 3 is part of/);
+    assert.match(messageOnly.body.reply, /exact live task/i);
+
+    const banglaFrontendPayloadShape = await request({
+      message: "[Current mission: Moon] তৃতীয় দিনে কি হবে",
+      state: {
+        mission: "moon",
+        campaignDays: 20,
+        day: 3,
+        resources: { power: 80, water: 80, food: 80, oxygen: 80, shielding: 80 },
+        currentEvent: {
+          id: "moon-03",
+          day: 3,
+          title: "Solar Array Dust Buildup",
+          task: {
+            title: "Service the solar array",
+            steps: [{ action: "Clean the panels" }],
+          },
+        },
+      },
+    });
+    assert.equal(banglaFrontendPayloadShape.statusCode, 200);
+    assert.equal(banglaFrontendPayloadShape.body.source, "mission-rules");
+    assert.match(banglaFrontendPayloadShape.body.reply, /৩ নম্বর দিনের কাজ/);
+
     const advice = await request({
       message: "What should I do if my power is low?",
       state: { mission: "Mars", resources: { power: 12 } },

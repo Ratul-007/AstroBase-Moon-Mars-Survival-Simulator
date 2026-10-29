@@ -214,10 +214,10 @@ test("real-world travel time is not the campaign length", () => {
     assert.equal(handleNovaQuestion(q, mars).answer, null, q);
   }
 });
-test("day question without task data goes to the model", () => {
+test("day question without task data gives an honest rules answer", () => {
   const r = handleNovaQuestion("what happens on day 5?", { mission: "mars", day: 3 });
-  assert.equal(r.answer, null);
-  assert.ok(r.prompt.user.includes("Mission Day 5"));
+  assert.match(r.answer, /Day 5 is part of Mars Outpost/);
+  assert.match(r.answer, /exact live task/i);
 });
 test("contextFromClientState cleans untrusted input", () => {
   const ctx = contextFromClientState({

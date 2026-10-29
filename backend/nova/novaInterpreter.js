@@ -783,7 +783,13 @@ function answerDayInfo(parsed, ctx, lang) {
     });
   }
   const tasks = ctx.tasks.filter((t) => t.day === day);
-  if (!tasks.length) return null; // no task data: let the model answer with the FACTS block
+  if (!tasks.length) {
+    return pick(lang, {
+      en: `Day ${day} is part of ${missionName(ctx, lang)}. I cannot see the exact live task without mission state, so check the task card for that day's event and choices.`,
+      bn: `${day} নম্বর দিনটি ${missionName(ctx, lang)}-এর অংশ। মিশনের লাইভ তথ্য ছাড়া ঠিক কাজটি দেখা যাচ্ছে না, তাই ওই দিনের ইভেন্ট ও বিকল্পের জন্য টাস্ক কার্ড দেখো।`,
+      bl: `Day ${day} holo ${missionName(ctx, lang)} mission er ongsho. Live mission state chara exact task dekhte pachhi na, tai oi diner event ar choice er jonno task card dekho.`,
+    });
+  }
   const titles = tasks.map((t) => `"${t.title}"${t.required ? "*" : ""}`).join(", ");
   return pick(lang, {
     en: `Day ${day} tasks: ${titles}. A * means it is a required objective.`,
@@ -1027,7 +1033,20 @@ function contextFromClientState(raw, missionKey) {
     if (Object.keys(survival).length) ctx.survival = survival;
   }
 
-  ctx.tasks = (Array.isArray(r.tasks) ? r.tasks : []).slice(0, 60).map((t) => {
+  const rawTasks = Array.isArray(r.tasks) ? r.tasks : [];
+  const taskSource = rawTasks.length || !r.currentEvent?.task
+    ? rawTasks
+    : [{
+        id: r.currentEvent.id,
+        day: r.currentEvent.day ?? r.day,
+        title: r.currentEvent.task.title,
+        required: false,
+        status: "pending",
+        affects: r.currentEvent.type,
+        bonusScore: r.currentEvent.task.bonusScore,
+      }];
+
+  ctx.tasks = taskSource.slice(0, 60).map((t) => {
     const task = {
       id: String(t?.id ?? "").slice(0, 40),
       day: num(t?.day, 0, 365),
