@@ -127,6 +127,10 @@ test("power why on Mars mentions dust", () => {
   const r = handleNovaQuestion("power kom keno hoy?", mars);
   assert.ok(/dhulo/i.test(r.answer));
 });
+test("Banglish Mars power why variation mentions dust", () => {
+  const r = handleNovaQuestion("power keno kom hoy?", mars);
+  assert.ok(/dhulo/i.test(r.answer));
+});
 test("power why on Moon mentions the long night", () => {
   const r = handleNovaQuestion("why is power low", { mission: "moon", resources: { power: 20 } });
   assert.ok(r.answer.includes("14 Earth days"));
@@ -138,6 +142,22 @@ test("objectives mismatch is flagged", () => {
 test("duration answer", () => {
   const r = handleNovaQuestion("30 days survive korte hobe?", mars);
   assert.ok(r.answer.includes("30 diner"));
+});
+test("current event task is retained beside state tasks", () => {
+  const ctx = contextFromClientState({
+    mission: "mars",
+    day: 3,
+    tasks: [{ id: "general", day: 3, title: "Check supplies" }],
+    currentEvent: {
+      id: "mars-03",
+      day: 3,
+      task: { title: "Repair the antenna", steps: [{ action: "Inspect the cable" }] },
+    },
+  });
+  assert.deepEqual(
+    ctx.tasks.map((task) => task.title),
+    ["Check supplies", "Repair the antenna"]
+  );
 });
 console.log("\nCampaign detection");
 for (const [question, expected, language] of [

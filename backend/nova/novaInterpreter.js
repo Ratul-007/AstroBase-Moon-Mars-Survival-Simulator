@@ -13,24 +13,6 @@
 
 // -----------------------------------------------------------------------------
 // 0. Mission context the frontend should send (all fields optional)
-//
-// {
-//   mission: "moon" | "mars",
-//   campaignDays: 30,
-//   day: 3,
-//   resources: { power: 42, water: 70, food: 55, oxygen: 80, shielding: 60 }, // 0-100
-//   objectives: { total: 5, done: 2 },
-//   score: 120,
-//   tasks: [{
-//     id: "solar-repair", day: 3, title: "Repair the solar panel",
-//     required: true,            // part of the mission objectives?
-//     status: "pending",         // "pending" | "done"
-//     affects: "power",          // resource this task protects
-//     penalty: 10,               // % that resource drops if skipped (only if your engine knows it)
-//     bonusScore: 0,             // bonus points for optional tasks
-//     why: { en: "...", bn: "...", bl: "..." }   // optional science reason
-//   }]
-// }
 // -----------------------------------------------------------------------------
 
 const DEFAULT_CAMPAIGN_DAYS = { moon: 20, mars: 30 };
@@ -54,13 +36,13 @@ function addNumbers(target, words, start = 1) {
   });
 }
 
-// English
 addNumbers(CARDINALS, [
   "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
   "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen",
   "eighteen", "nineteen", "twenty",
 ]);
 CARDINALS.thirty = 30;
+
 addNumbers(ORDINALS, [
   "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth",
   "ninth", "tenth", "eleventh", "twelfth", "thirteenth", "fourteenth",
@@ -68,7 +50,6 @@ addNumbers(ORDINALS, [
 ]);
 ORDINALS.thirtieth = 30;
 
-// Banglish
 addNumbers(CARDINALS, [
   "ek", "dui|dwi", "tin", "char", "pach|panch|pachh", "choy|chhoy|cho",
   "sat|shat", "aat", "nou", "dosh|dos", "egaro", "baro", "tero",
@@ -77,31 +58,33 @@ addNumbers(CARDINALS, [
 ]);
 CARDINALS.tirish = 30;
 CARDINALS.tirisho = 30;
+
 addNumbers(ORDINALS, [
   "prothom", "ditiyo|dwitiyo", "tritiyo|tritio", "chaturtho|chotur tho",
   "ponchom|pancham", "shoshtho|sosto", "shoptom|saptam", "ostom|ashtam",
   "nobom|nabam", "doshom|dasham",
 ]);
 
-// Bangla script
 addNumbers(CARDINALS, [
   "এক", "দুই|দুটি|দু", "তিন", "চার", "পাঁচ|পাচ", "ছয়|ছয়", "সাত", "আট", "নয়",
   "দশ", "এগারো", "বারো", "তেরো", "চৌদ্দ", "পনেরো", "ষোল", "সতেরো", "আঠারো",
   "উনিশ", "বিশ",
 ]);
 CARDINALS["ত্রিশ"] = 30;
+
 addNumbers(ORDINALS, [
   "প্রথম", "দ্বিতীয়", "তৃতীয়", "চতুর্থ", "পঞ্চম", "ষষ্ঠ", "সপ্তম", "অষ্টম",
   "নবম", "দশম",
 ]);
 
-// Words that mean the same thing in every language we support.
 const CANON = {};
+
 function addCanon(canon, words) {
   words.forEach((w) => {
     CANON[w] = canon;
   });
 }
+
 addCanon("day", ["day", "din", "dine", "diner", "dinta", "dinti", "দিন", "দিনে", "দিনের", "দিনটা", "দিনটি"]);
 addCanon("days", ["days"]);
 addCanon("campaign", ["campaign", "অভিযান", "অভিযানে"]);
@@ -116,7 +99,6 @@ addCanon("left", ["baki", "baaki", "bakito", "বাকি", "left", "remaining"
 addCanon("skip", ["skip", "skipped", "skipping", "miss", "missed", "ignore"]);
 addCanon("ki", ["ki", "kii", "কি", "কী"]);
 addCanon("hobe", ["hobe", "hbe", "hobey", "হবে"]);
-addCanon("why", ["why", "keno", "kano", "কেন"]);
 addCanon("na", ["na", "nah", "না"]);
 addCanon("korle", ["korle", "করলে"]);
 addCanon("hole", ["hole", "হলে"]);
@@ -127,7 +109,6 @@ addCanon("howmany", ["koto", "কত"]);
 addCanon("survive", ["টিকে", "টিকতে", "বাঁচতে", "বাঁচা"]);
 addCanon("hint", ["hint", "hints", "হিন্ট", "সাহায্য"]);
 
-// Resources: Bangla words get prefix matching so "অক্সিজেনের" still works.
 const RESOURCE_WORDS = {
   power: ["power", "electricity", "electric", "bidyut", "bidyat", "পাওয়ার"],
   water: ["water", "pani", "jol", "ওয়াটার"],
@@ -135,6 +116,7 @@ const RESOURCE_WORDS = {
   oxygen: ["oxygen", "oxigen", "o2", "ashijen"],
   shielding: ["shielding", "radiation", "shield", "রেডিয়েশন", "শিল্ড"],
 };
+
 const RESOURCE_BN_PREFIXES = {
   power: ["বিদ্যুৎ", "বিদ্যুত"],
   water: ["পানি", "জল"],
@@ -142,8 +124,12 @@ const RESOURCE_BN_PREFIXES = {
   oxygen: ["অক্সিজেন"],
   shielding: ["বিকিরণ"],
 };
+
 const RESOURCE_KEYS = Object.keys(RESOURCE_WORDS);
-for (const [key, words] of Object.entries(RESOURCE_WORDS)) addCanon(key, words);
+
+for (const [key, words] of Object.entries(RESOURCE_WORDS)) {
+  addCanon(key, words);
+}
 
 const CLASSIFIERS = new Set(["ta", "ti", "টা", "টি", "khana", "খানা"]);
 const BN_SUFFIXES = ["টা", "টি", "টে", "ের", "ে"];
@@ -152,6 +138,7 @@ const BN_RE = /[\u0980-\u09FF]/;
 function lookupNumber(token) {
   if (token in ORDINALS) return { n: ORDINALS[token], ord: true };
   if (token in CARDINALS) return { n: CARDINALS[token], ord: false };
+
   if (BN_RE.test(token)) {
     for (const suf of BN_SUFFIXES) {
       if (token.endsWith(suf)) {
@@ -161,6 +148,7 @@ function lookupNumber(token) {
       }
     }
   }
+
   return null;
 }
 
@@ -171,25 +159,18 @@ function lookupBnResource(token) {
   return null;
 }
 
-/**
- * Turns any supported phrasing into canonical tokens.
- *   "tin number diner kaj na korle?" -> "#3 number day task na korle"
- *   "তৃতীয় দিন"                      -> "#3o day"
- * Numbers become #n (cardinal) or #no (ordinal).
- */
 function normalize(text) {
   let s = bnToAscii(String(text ?? ""))
     .replace(/\[Current mission:[^\]]*\]/gi, " ")
     .toLowerCase();
 
-  // Bangla ordinal suffixes written after digits: 3য়, 4র্থ, 1ম, 6ষ্ঠ
   s = s.replace(/(\d+)\s*(য়|র্থ|ষ্ঠ|ম)(?![\u0980-\u09FF])/g, "$1th");
-  // Bangla counting words glued to digits: ৩টি, ৩টা -> 3
   s = s.replace(/(\d+)\s*(টি|টা|খানা)(?![\u0980-\u09FF])/g, "$1 ");
   s = s.replace(/%/g, " percent ");
   s = s.replace(/[^\p{L}\p{M}\p{N}/\s]/gu, " ");
 
   const out = [];
+
   for (const raw of s.split(/\s+/).filter(Boolean)) {
     if (CLASSIFIERS.has(raw)) continue;
 
@@ -198,10 +179,12 @@ function normalize(text) {
       out.push(`#${m[1]}o`);
       continue;
     }
+
     if (/^\d+$/.test(raw)) {
       out.push(`#${raw}`);
       continue;
     }
+
     m = raw.match(/^(\d+)\/(\d+)$/);
     if (m) {
       out.push(`frac:${m[1]}/${m[2]}`);
@@ -213,21 +196,26 @@ function normalize(text) {
       out.push(num.ord ? `#${num.n}o` : `#${num.n}`);
       continue;
     }
+
     if (raw in CANON) {
       out.push(CANON[raw]);
       continue;
     }
+
     const bnRes = BN_RE.test(raw) ? lookupBnResource(raw) : null;
     if (bnRes) {
       out.push(bnRes);
       continue;
     }
+
     if (/^(survive|survived|বাঁচ.*)$/.test(raw)) {
       out.push("survive");
       continue;
     }
+
     out.push(raw);
   }
+
   return out.join(" ");
 }
 
@@ -246,24 +234,35 @@ function detectLanguage(text) {
   const raw = String(text ?? "").replace(/\[Current mission:[^\]]*\]/gi, " ");
   const hasBn = BN_RE.test(raw);
   const latinWords = raw.toLowerCase().match(/[a-z]+/g) || [];
+
   if (hasBn) return latinWords.length >= 3 ? "mixed" : "bn";
+
   const hits = latinWords.filter((w) => BANGLISH_MARKERS.has(w));
-  const strong = hits.filter((w) => !["number", "na", "ta", "te", "er", "tin", "char"].includes(w));
+  const strong = hits.filter((w) =>
+    !["number", "na", "ta", "te", "er", "tin", "char"].includes(w)
+  );
+
   if (strong.length >= 1 || hits.length >= 2) return "banglish";
+
   return "en";
 }
 
 const replyLang = (detected) =>
-  detected === "bn" || detected === "mixed" ? "bn" : detected === "banglish" ? "bl" : "en";
+  detected === "bn" || detected === "mixed"
+    ? "bn"
+    : detected === "banglish"
+      ? "bl"
+      : "en";
 
 // -----------------------------------------------------------------------------
-// 2. Interpreter: find what the numbers mean
+// 2. Interpreter
 // -----------------------------------------------------------------------------
 
 const RES_ALT = RESOURCE_KEYS.join("|");
 
 function requestedMissionFromQuestion(rawText, canonical) {
   const original = String(rawText ?? "");
+
   const campaignWords =
     /\b(campaign|mission|outpost)\b/i.test(original) ||
     /\b(campaign|mission|outpost)\b/.test(canonical) ||
@@ -271,98 +270,142 @@ function requestedMissionFromQuestion(rawText, canonical) {
 
   if (!campaignWords) return null;
 
-  if (/\bmoon\b|\bchand(?:er)?\b|চাঁদ(?:ের|ে)?/.test(canonical) ||
-      /চাঁদ/.test(original)) {
+  if (
+    /\bmoon\b|\bchand(?:er)?\b|চাঁদ(?:ের|ে)?/.test(canonical) ||
+    /চাঁদ/.test(original)
+  ) {
     return "moon";
   }
-  if (/\bmars\b|\bmongol(?:er)?\b|মঙ্গল(?:ের|ে)?/.test(canonical) ||
-      /মঙ্গল/.test(original)) {
+
+  if (
+    /\bmars\b|\bmongol(?:er)?\b|মঙ্গল(?:ের|ে)?/.test(canonical) ||
+    /মঙ্গল/.test(original)
+  ) {
     return "mars";
   }
+
   return null;
 }
 
 function interpretQuestion(rawText, ctx = {}) {
   const canon = normalize(rawText);
   const detected = detectLanguage(rawText);
-  const campaignDays = ctx.campaignDays ?? DEFAULT_CAMPAIGN_DAYS[ctx.mission] ?? null;
+  const campaignDays =
+    ctx.campaignDays ?? DEFAULT_CAMPAIGN_DAYS[ctx.mission] ?? null;
+
   const entities = {};
   const intents = [];
   const requestedMission = requestedMissionFromQuestion(rawText, canon);
 
-  // --- Fractions like 3/20 -------------------------------------------------
   const frac = canon.match(/frac:(\d+)\/(\d+)/);
+
   if (frac) {
     const a = Number(frac[1]);
     const b = Number(frac[2]);
-    if (campaignDays && b === campaignDays) entities.dayProgress = { day: a, of: b };
-    else if (ctx.objectives?.total === b) entities.objectiveProgress = { done: a, total: b };
-    else entities.fraction = { a, b };
+
+    if (campaignDays && b === campaignDays) {
+      entities.dayProgress = { day: a, of: b };
+    } else if (ctx.objectives?.total === b) {
+      entities.objectiveProgress = { done: a, total: b };
+    } else {
+      entities.fraction = { a, b };
+    }
   }
 
-  // --- Resource with a value: "oxygen 3%", "3% oxygen" ---------------------
-  let m = canon.match(new RegExp(`\\b(${RES_ALT})\\b(?:\\s+\\S+){0,2}?\\s+#(\\d+)\\s+percent`));
+  let m = canon.match(
+    new RegExp(`\\b(${RES_ALT})\\b(?:\\s+\\S+){0,2}?\\s+#(\\d+)\\s+percent`)
+  );
+
   if (m) entities.resource = { name: m[1], value: Number(m[2]) };
+
   if (!entities.resource) {
-    m = canon.match(new RegExp(`#(\\d+)\\s+percent\\s+(?:\\S+\\s+){0,2}?\\b(${RES_ALT})\\b`));
+    m = canon.match(
+      new RegExp(`#(\\d+)\\s+percent\\s+(?:\\S+\\s+){0,2}?\\b(${RES_ALT})\\b`)
+    );
+
     if (m) entities.resource = { name: m[2], value: Number(m[1]) };
   }
+
   if (!entities.resource) {
     m = canon.match(new RegExp(`\\b(${RES_ALT})\\b`));
     if (m) entities.resourceMention = m[1];
   }
 
-  // --- Score values: "score 0", "score zero", Bangla digits ---------------
   m = canon.match(/\b(?:score|points)\s+#(\d+)\b/);
   if (m) entities.scoreValue = Number(m[1]);
 
-  // --- Remaining objective count: "3 ta objective baki" --------------------
-  m = canon.match(/#(\d+)\s+(?:objective|task)(?:\s+\S+)?\s+left/) ||
-      canon.match(/\bleft\s+#(\d+)\s+(?:objective|task)/);
+  m =
+    canon.match(/#(\d+)\s+(?:objective|task)(?:\s+\S+)?\s+left/) ||
+    canon.match(/\bleft\s+#(\d+)\s+(?:objective|task)/);
+
   if (m) entities.remainingObjectives = Number(m[1]);
 
-  // --- Campaign duration: "30 days survive korte hobe?" --------------------
   m = canon.match(/#(\d+)\s+days\b/);
   if (m) entities.durationDays = Number(m[1]);
 
-  // --- Day reference ------------------------------------------------------
-  // "3rd day", "third day", "day 3", "day three", "3 number din", "tin number diner"
   const dayPatterns = [
     /#(\d+)o\s+(?:number\s+)?day\b/,
     /#(\d+)\s+number\s+day\b/,
     /\bday\s+#(\d+)\b/,
     /#(\d+)\s+day\b/,
   ];
+
   for (const re of dayPatterns) {
     m = canon.match(re);
+
     if (m) {
       const n = Number(m[1]);
-      // "30 din" when the campaign is 30 days long means duration, not Day 30
+
       if (campaignDays && n === campaignDays && re === dayPatterns[3]) {
         entities.durationDays = n;
       } else {
         entities.day = { value: n, source: m[0] };
       }
+
       break;
     }
   }
 
-  // --- Intents ------------------------------------------------------------
   const has = (re) => re.test(canon);
+
   if (
     has(/\bskip\b/) ||
     has(/\bna (korle|kora|kore|hole)\b/) ||
     has(/\b(not|dont|didnt|cant|cannot)\s+(do|complete|finish)\b/) ||
     has(/\bif i (do not|dont)\b/)
-  ) intents.push("skip");
-  if (has(/\bki (hobe|hoy)\b/) || has(/\bwhat (happens|will happen|if)\b/) || has(/\bwhat'?s? next\b/)) intents.push("whatif");
-  if (has(/\bwhy\b/)) intents.push("why");
-  if (has(/\bhint\b|\bki korbo\b|\bwhat should i (do|try)\b|\bwhat do i do\b/)) intents.push("hint");
-  if (has(/\bwhich day\b|\bcurrent day\b|\bwhich\b.*\bday\b|\bday koto\b|\bhowmany\b.*\bday\b.*\b(gelo|gese|done|passed)\b/)) intents.push("status");
-  if (entities.scoreValue !== undefined &&
-      has(/\b(win|won|winning|success|successful|succeed|score|points)\b/)) {
+  ) {
+    intents.push("skip");
+  }
+
+  if (
+    has(/\bki (hobe|hoy)\b/) ||
+    has(/\bwhat (happens|will happen|if)\b/) ||
+    has(/\bwhat'?s? next\b/)
+  ) {
+    intents.push("whatif");
+  }
+
+  if (has(/\bwhy\b|\bkeno\b/)) intents.push("why");
+
+  if (
+    has(/\bhint\b|\bki korbo\b|\bwhat should i (do|try)\b|\bwhat do i do\b/)
+  ) {
+    intents.push("hint");
+  }
+
+  if (
+    has(/\bwhich day\b|\bcurrent day\b|\bwhich\b.*\bday\b|\bday koto\b|\bhowmany\b.*\bday\b.*\b(gelo|gese|done|passed)\b/)
+  ) {
+    intents.push("status");
+  }
+
+  if (
+    entities.scoreValue !== undefined &&
+    has(/\b(win|won|winning|success|successful|succeed|score|points)\b/)
+  ) {
     intents.push("scoreOutcome");
   }
+
   if (
     entities.durationDays ||
     has(/\bhowmany\s+(days|day)\b/) ||
@@ -370,7 +413,9 @@ function interpretQuestion(rawText, ctx = {}) {
     has(/\bsurvive\b/) ||
     has(/\bhowmany\b.*\bday\b/) ||
     has(/\btotal\b.*\bday\b/)
-  ) intents.push("duration");
+  ) {
+    intents.push("duration");
+  }
 
   return {
     original: rawText,
@@ -384,7 +429,7 @@ function interpretQuestion(rawText, ctx = {}) {
 }
 
 // -----------------------------------------------------------------------------
-// 3. Text in three languages: en = English, bn = Bangla, bl = Banglish
+// 3. Localized mission content
 // -----------------------------------------------------------------------------
 
 const MISSION_NAME = {
@@ -490,7 +535,11 @@ function pick(lang, obj) {
 
 function resourceWhy(key, lang, mission) {
   const info = RES[key];
-  const extra = key === "power" && mission && info[mission] ? ` ${pick(lang, info[mission])}` : "";
+  const extra =
+    key === "power" && mission && info[mission]
+      ? ` ${pick(lang, info[mission])}`
+      : "";
+
   return `${pick(lang, info.why)}${extra}`;
 }
 
@@ -504,7 +553,9 @@ function finish(text, lang) {
 
 function withDefaults(ctxIn = {}, rawText = "") {
   const prefix = String(rawText).match(/\[Current mission:\s*(moon|mars)\s*\]/i);
-  const mission = (ctxIn.mission || (prefix && prefix[1].toLowerCase()) || "").toLowerCase() || null;
+  const mission =
+    (ctxIn.mission || (prefix && prefix[1].toLowerCase()) || "").toLowerCase() || null;
+
   return {
     ...ctxIn,
     mission,
@@ -516,10 +567,13 @@ function withDefaults(ctxIn = {}, rawText = "") {
 }
 
 const missionName = (ctx, lang) =>
-  ctx.mission ? pick(lang, MISSION_NAME[ctx.mission]) : pick(lang, { en: "the mission", bn: "মিশন", bl: "mission" });
+  ctx.mission
+    ? pick(lang, MISSION_NAME[ctx.mission])
+    : pick(lang, { en: "the mission", bn: "মিশন", bl: "mission" });
 
 function dayLine(ctx, lang) {
   if (!ctx.day || !ctx.campaignDays) return "";
+
   return pick(lang, {
     en: `${missionName(ctx, lang)} · Day ${ctx.day} of ${ctx.campaignDays}`,
     bn: `${missionName(ctx, lang)} · ${ctx.day} নম্বর দিন, মোট ${ctx.campaignDays} দিনের মধ্যে`,
@@ -534,6 +588,7 @@ function dayLine(ctx, lang) {
 function answerDuration(ctx, lang) {
   const n = ctx.campaignDays;
   if (!n) return null;
+
   return pick(lang, {
     en: `${missionName(ctx, lang)} lasts ${n} days. Your job is to keep the crew safe and the base running until the last day.`,
     bn: `${missionName(ctx, lang)} মিশনটি ${n} দিনের। শেষ দিন পর্যন্ত ক্রুকে নিরাপদ রাখা আর বেস চালু রাখাই তোমার কাজ।`,
@@ -543,6 +598,7 @@ function answerDuration(ctx, lang) {
 
 function answerScoreOutcome(ctx, lang, scoreValue) {
   const score = scoreValue === undefined ? "zero or negative" : String(scoreValue);
+
   return pick(lang, {
     en: `A score of ${score} is not enough for success. AstroBase requires a positive final score, survival through the full campaign, and completed objectives.`,
     bn: `${score} স্কোরে মিশন সফল হবে না। AstroBase-এ শেষ স্কোর ধনাত্মক হতে হবে, পুরো মিশন টিকে থাকতে হবে এবং লক্ষ্যগুলো শেষ করতে হবে।`,
@@ -560,7 +616,9 @@ function answerUnknownSurvivalOxygen(lang) {
 
 function answerStatus(ctx, lang) {
   if (!ctx.day || !ctx.campaignDays) return null;
+
   const left = ctx.campaignDays - ctx.day;
+
   return pick(lang, {
     en: `You are on Day ${ctx.day} of ${ctx.campaignDays} in ${missionName(ctx, lang)}. ${left} days to go.`,
     bn: `তুমি এখন ${missionName(ctx, lang)}-এর ${ctx.day} নম্বর দিনে আছো, মোট ${ctx.campaignDays} দিনের মধ্যে। আরও ${left} দিন বাকি।`,
@@ -570,6 +628,7 @@ function answerStatus(ctx, lang) {
 
 function answerDayProgress(entity, ctx, lang) {
   const left = entity.of - entity.day;
+
   return pick(lang, {
     en: `${entity.day}/${entity.of} means Day ${entity.day} of ${entity.of}. ${left} days to go.`,
     bn: `${entity.day}/${entity.of} মানে ${entity.of} দিনের মধ্যে ${entity.day} নম্বর দিন। আরও ${left} দিন বাকি।`,
@@ -584,6 +643,7 @@ function answerResourceValue(name, value, ctx, lang) {
   const lv = pick(lang, LEVEL[level]);
   const why = resourceWhy(name, lang, ctx.mission);
   const fix = pick(lang, info.fix);
+
   const head =
     level === "critical"
       ? pick(lang, {
@@ -596,16 +656,23 @@ function answerResourceValue(name, value, ctx, lang) {
           bn: `${rn} ${value}% মানে ${lv}।`,
           bl: `${rn} ${value}% mane ${lv}.`,
         });
+
   const tail =
     level === "good" || level === "ok"
       ? ""
       : ` ${pick(lang, { en: "What to do:", bn: "কী করবে:", bl: "Ki korbe:" })} ${fix}`;
-  return `${head} ${pick(lang, { en: "Why it matters:", bn: "কেন জরুরি:", bl: "Keno jaruri:" })} ${why}${tail}`;
+
+  return `${head} ${pick(lang, {
+    en: "Why it matters:",
+    bn: "কেন জরুরি:",
+    bl: "Keno jaruri:",
+  })} ${why}${tail}`;
 }
 
 function answerResourceWhy(name, ctx, lang) {
   const rn = pick(lang, RES[name].name);
   const v = ctx.resources?.[name];
+
   const now =
     typeof v === "number"
       ? pick(lang, {
@@ -614,20 +681,25 @@ function answerResourceWhy(name, ctx, lang) {
           bl: ` Ekhon eta ${v}%.`,
         })
       : "";
+
   return `${rn}: ${resourceWhy(name, lang, ctx.mission)}${now}`;
 }
 
 function answerObjectives(entity, ctx, lang) {
-  const real = ctx.objectives && typeof ctx.objectives.total === "number"
-    ? ctx.objectives.total - (ctx.objectives.done || 0)
-    : null;
+  const real =
+    ctx.objectives && typeof ctx.objectives.total === "number"
+      ? ctx.objectives.total - (ctx.objectives.done || 0)
+      : null;
+
   const n = real ?? entity;
   const mismatch = real !== null && real !== entity;
+
   const base = pick(lang, {
     en: `You have ${n} objectives left. Do the ones that protect your crew first, then the bonus ones.`,
     bn: `তোমার ${n}টি লক্ষ্য বাকি আছে। আগে ক্রুকে রক্ষা করার কাজগুলো করো, তারপর বোনাস কাজ।`,
     bl: `Tomar ${n} ta objective baki ache. Age crew ke rokkha korar kaj gulo koro, tarpor bonus kaj.`,
   });
+
   const note = mismatch
     ? pick(lang, {
         en: ` (You said ${entity}, but I can see ${n} in your mission.)`,
@@ -635,12 +707,14 @@ function answerObjectives(entity, ctx, lang) {
         bl: ` (Tumi ${entity} bolle, kintu ami tomar mission e ${n} ta dekhchi.)`,
       })
     : "";
+
   return base + note;
 }
 
 function taskLines(task, lang) {
   const t = `"${task.title}"`;
   const lines = [];
+
   if (task.required) {
     lines.push(
       pick(lang, {
@@ -651,8 +725,17 @@ function taskLines(task, lang) {
     );
   } else {
     const bonus = task.bonusScore
-      ? pick(lang, { en: `${task.bonusScore} bonus points`, bn: `${task.bonusScore} বোনাস পয়েন্ট`, bl: `${task.bonusScore} bonus point` })
-      : pick(lang, { en: "a bonus", bn: "একটা বোনাস", bl: "ekta bonus" });
+      ? pick(lang, {
+          en: `${task.bonusScore} bonus points`,
+          bn: `${task.bonusScore} বোনাস পয়েন্ট`,
+          bl: `${task.bonusScore} bonus point`,
+        })
+      : pick(lang, {
+          en: "a bonus",
+          bn: "একটা বোনাস",
+          bl: "ekta bonus",
+        });
+
     lines.push(
       pick(lang, {
         en: `${t} is optional. If you skip it, you may miss ${bonus}.`,
@@ -661,9 +744,11 @@ function taskLines(task, lang) {
       })
     );
   }
+
   if (task.affects && RES[task.affects]) {
     const rn = pick(lang, RES[task.affects].name);
     const drop = typeof task.penalty === "number" ? task.penalty : null;
+
     lines.push(
       drop !== null
         ? pick(lang, {
@@ -678,10 +763,12 @@ function taskLines(task, lang) {
           })
     );
   }
+
   const why = task.why && pick(lang, task.why);
   if (why) {
     lines.push(`${pick(lang, { en: "Why:", bn: "কেন:", bl: "Keno:" })} ${why}`);
   }
+
   return lines;
 }
 
@@ -696,6 +783,7 @@ function answerSkip(parsed, ctx, lang) {
       bl: `Day ${day} bole kichu nei. ${missionName(ctx, lang)} mission e mot ${ctx.campaignDays} din.`,
     });
   }
+
   if (day && ctx.day && day < ctx.day) {
     notes.push(
       pick(lang, {
@@ -715,10 +803,14 @@ function answerSkip(parsed, ctx, lang) {
   }
 
   let tasks = day ? ctx.tasks.filter((t) => t.day === day) : [];
+
   if (parsed.entities.resourceMention) {
-    const byResource = tasks.filter((t) => t.affects === parsed.entities.resourceMention);
+    const byResource = tasks.filter(
+      (t) => t.affects === parsed.entities.resourceMention
+    );
     if (byResource.length) tasks = byResource;
   }
+
   const pending = tasks.filter((t) => t.status !== "done");
 
   const head = day
@@ -751,30 +843,34 @@ function answerSkip(parsed, ctx, lang) {
       bn: "টিপ: আগে জরুরি কাজ আর যেগুলো রিসোর্স বাঁচায় সেগুলো করো।",
       bl: "Tip: Age required kaj ar jegulo resource bachay segulo koro.",
     });
+
     return [head, ...notes, body, tip].join(" ");
   }
 
-  // No task data for that day: be honest, give the general idea.
   const honest = pick(lang, {
     en: "I cannot see the exact rule for this task yet, so here is the general idea:",
     bn: "এই কাজের ঠিক নিয়মটা আমি এখনো দেখতে পাচ্ছি না, তাই সাধারণ ধারণাটা বলি:",
     bl: "Ei kajer thik niyomta ami ekhono dekhte pachhi na, tai shadharon dharona boli:",
   });
+
   const general = pick(lang, {
     en: "If it is optional, you may miss a bonus. If it is a required objective, your progress stays unfinished and mission success can drop. If it protects Power, Water, Food or Oxygen, that resource can run low.",
     bn: "ঐচ্ছিক হলে বোনাস হাতছাড়া হতে পারে। জরুরি লক্ষ্য হলে অগ্রগতি অসম্পূর্ণ থাকবে আর মিশনের সফলতা কমতে পারে। বিদ্যুৎ, পানি, খাবার বা অক্সিজেন রক্ষার কাজ হলে ওই রিসোর্স কমে যেতে পারে।",
     bl: "Optional hole bonus miss hote pare. Required objective hole progress adhura thakbe ar mission shofolota kome jete pare. Power, Water, Food ba Oxygen bachanor kaj hole oi resource kome jete pare.",
   });
+
   const tip = pick(lang, {
     en: "Tip: open the task card, read the details, then choose which task to do first.",
     bn: "টিপ: টাস্ক কার্ড খুলে বিস্তারিত পড়ো, তারপর ঠিক করো কোনটা আগে করবে।",
     bl: "Tip: Task card khule details poro, tarpor thik koro konta age korbe.",
   });
+
   return [head, ...notes, honest, general, tip].join(" ");
 }
 
 function answerDayInfo(parsed, ctx, lang) {
   const day = parsed.entities.day.value;
+
   if (ctx.campaignDays && day > ctx.campaignDays) {
     return pick(lang, {
       en: `There is no Day ${day}. ${missionName(ctx, lang)} only has ${ctx.campaignDays} days.`,
@@ -782,9 +878,14 @@ function answerDayInfo(parsed, ctx, lang) {
       bl: `Day ${day} bole kichu nei. ${missionName(ctx, lang)} mission e mot ${ctx.campaignDays} din.`,
     });
   }
+
   const tasks = ctx.tasks.filter((t) => t.day === day);
-  if (!tasks.length) return null; // no task data: let the model answer with the FACTS block
-  const titles = tasks.map((t) => `"${t.title}"${t.required ? "*" : ""}`).join(", ");
+  if (!tasks.length) return null;
+
+  const titles = tasks
+    .map((t) => `"${t.title}"${t.required ? "*" : ""}`)
+    .join(", ");
+
   return pick(lang, {
     en: `Day ${day} tasks: ${titles}. A * means it is a required objective.`,
     bn: `${day} নম্বর দিনের কাজ: ${titles}। * চিহ্ন মানে এটা জরুরি লক্ষ্য।`,
@@ -796,38 +897,47 @@ function answerDayInfo(parsed, ctx, lang) {
 // 4. Mission-aware hints
 // -----------------------------------------------------------------------------
 
-/**
- * Picks the most useful hint for the current moment.
- * Returns { key, text } or null. `key` identifies the situation so the
- * frontend can avoid repeating the same hint.
- */
 function buildHint(ctxIn, lang = "en") {
   const ctx = withDefaults(ctxIn);
-  const entries = Object.entries(ctx.resources).filter(([k, v]) => RES[k] && typeof v === "number");
+
+  const entries = Object.entries(ctx.resources)
+    .filter(([k, v]) => RES[k] && typeof v === "number");
+
   const lowest = entries.sort((a, b) => a[1] - b[1])[0];
 
   if (lowest && lowest[1] <= 30) {
     const [name, value] = lowest;
     const level = resourceLevel(value);
     const rn = pick(lang, RES[name].name);
+
     const text = pick(lang, {
       en: `Hint: your ${rn} is ${pick(lang, LEVEL[level])} (${value}%). ${pick(lang, RES[name].fix)} Why? ${resourceWhy(name, lang, ctx.mission)}`,
       bn: `হিন্ট: তোমার ${rn} ${pick(lang, LEVEL[level])} (${value}%)। ${pick(lang, RES[name].fix)} কেন? ${resourceWhy(name, lang, ctx.mission)}`,
       bl: `Hint: tomar ${rn} ${pick(lang, LEVEL[level])} (${value}%). ${pick(lang, RES[name].fix)} Keno? ${resourceWhy(name, lang, ctx.mission)}`,
     });
+
     return { key: `resource:${name}:${level}`, text: finish(text, lang) };
   }
 
-  const todays = ctx.tasks.filter((t) => t.day === ctx.day && t.status !== "done");
+  const todays = ctx.tasks.filter(
+    (t) => t.day === ctx.day && t.status !== "done"
+  );
+
   const required = todays.find((t) => t.required) || todays[0];
+
   if (required) {
     const why = required.why && pick(lang, required.why);
+
     const text = pick(lang, {
       en: `Hint: today's ${required.required ? "required " : ""}task is "${required.title}".${why ? ` Why? ${why}` : ""}`,
       bn: `হিন্ট: আজকের ${required.required ? "জরুরি " : ""}কাজ "${required.title}"।${why ? ` কেন? ${why}` : ""}`,
       bl: `Hint: ajker ${required.required ? "required " : ""}kaj "${required.title}".${why ? ` Keno? ${why}` : ""}`,
     });
-    return { key: `task:${required.id ?? required.title}`, text: finish(text, lang) };
+
+    return {
+      key: `task:${required.id ?? required.title}`,
+      text: finish(text, lang),
+    };
   }
 
   const text = pick(lang, {
@@ -835,10 +945,10 @@ function buildHint(ctxIn, lang = "en") {
     bn: "হিন্ট: আগে রিসোর্স বারগুলো দেখো, তারপর যে কাজ ক্রুকে রক্ষা করে সেটা বেছে নাও।",
     bl: "Hint: age resource bar gulo dekho, tarpor je kaj crew ke rokkha kore seta beche nao.",
   });
+
   return { key: "generic", text: finish(text, lang) };
 }
 
-/** Returns a hint only when the situation changed since lastKey. */
 function hintTrigger(ctx, lastKey, lang = "en") {
   const hint = buildHint(ctx, lang);
   if (!hint || hint.key === "generic" || hint.key === lastKey) return null;
@@ -853,9 +963,11 @@ function answerFromRules(parsed, ctx) {
   const lang = parsed.replyLanguage;
   const { entities, intents } = parsed;
   const has = (i) => intents.includes(i);
+
   let text = null;
-  // Real-world questions ("how many days to travel to Mars?") are not about the game.
-  const realWorld = /\b(nasa|esa|spacex|isro|travel|journey|reach|real|orbit|light|years?|hours?|minutes?|jete|lage|lagbe|pouchate|pouchabo)\b/.test(parsed.canonical) ||
+
+  const realWorld =
+    /\b(nasa|esa|spacex|isro|travel|journey|reach|real|orbit|light|years?|hours?|minutes?|jete|lage|lagbe|pouchate|pouchabo)\b/.test(parsed.canonical) ||
     /(যেতে|লাগে|লাগবে|পৌঁছ)/.test(parsed.original || "");
 
   const survivalOxygenQuestion =
@@ -872,23 +984,38 @@ function answerFromRules(parsed, ctx) {
     text = answerSkip(parsed, ctx, lang);
   } else if (entities.day && (has("whatif") || intents.length === 0)) {
     text = answerDayInfo(parsed, ctx, lang);
-  } else if (entities.resource && (has("whatif") || has("why") || intents.length === 0)) {
-    text = answerResourceValue(entities.resource.name, entities.resource.value, ctx, lang);
+  } else if (
+    entities.resource &&
+    (has("whatif") || has("why") || intents.length === 0)
+  ) {
+    text = answerResourceValue(
+      entities.resource.name,
+      entities.resource.value,
+      ctx,
+      lang
+    );
   } else if (entities.resourceMention && has("why")) {
     text = answerResourceWhy(entities.resourceMention, ctx, lang);
   } else if (typeof entities.remainingObjectives === "number") {
     text = answerObjectives(entities.remainingObjectives, ctx, lang);
   } else if (has("duration") && !realWorld) {
     const requestedMission = parsed.requestedMission;
+
     const durationCtx = requestedMission
-      ? { ...ctx, mission: requestedMission, campaignDays: DEFAULT_CAMPAIGN_DAYS[requestedMission] }
+      ? {
+          ...ctx,
+          mission: requestedMission,
+          campaignDays: DEFAULT_CAMPAIGN_DAYS[requestedMission],
+        }
       : ctx;
+
     text = answerDuration(durationCtx, lang);
   } else if (has("status") && !realWorld) {
     text = answerStatus(ctx, lang);
   } else if (has("hint")) {
     text = buildHint(ctx, lang)?.text ?? null;
   }
+
   return text ? finish(text, lang) : null;
 }
 
@@ -901,28 +1028,47 @@ const LANG_NAME = {
 function buildNovaPrompt(question, parsed, ctx) {
   const lang = parsed.replyLanguage;
   const facts = [];
+
   if (ctx.mission) facts.push(`Mission: ${MISSION_NAME[ctx.mission].en}`);
-  if (ctx.day && ctx.campaignDays) facts.push(`Day: ${ctx.day} of ${ctx.campaignDays}`);
+  if (ctx.day && ctx.campaignDays) {
+    facts.push(`Day: ${ctx.day} of ${ctx.campaignDays}`);
+  }
+
   const res = Object.entries(ctx.resources || {})
     .filter(([k]) => RES[k])
     .map(([k, v]) => `${k} ${v}%`)
     .join(", ");
+
   if (res) facts.push(`Resources: ${res}`);
-  if (ctx.objectives) facts.push(`Objectives: ${ctx.objectives.done || 0} of ${ctx.objectives.total} done`);
+
+  if (ctx.objectives) {
+    facts.push(`Objectives: ${ctx.objectives.done || 0} of ${ctx.objectives.total} done`);
+  }
+
   const todays = (ctx.tasks || []).filter((t) => t.day === ctx.day);
+
   if (todays.length) {
     facts.push(
       "Today's tasks: " +
-        todays.map((t) => `${t.title} (${t.required ? "required" : "optional"}, ${t.status || "pending"})`).join("; ")
+        todays
+          .map((t) => `${t.title} (${t.required ? "required" : "optional"}, ${t.status || "pending"})`)
+          .join("; ")
     );
   }
 
   const understood = [];
   const e = parsed.entities;
+
   if (e.day) understood.push(`the player means Mission Day ${e.day.value}`);
-  if (e.resource) understood.push(`the player means ${e.resource.name} at ${e.resource.value}%`);
-  if (typeof e.remainingObjectives === "number") understood.push(`the player means ${e.remainingObjectives} objectives left`);
-  if (e.durationDays) understood.push(`the player means a campaign length of ${e.durationDays} days`);
+  if (e.resource) {
+    understood.push(`the player means ${e.resource.name} at ${e.resource.value}%`);
+  }
+  if (typeof e.remainingObjectives === "number") {
+    understood.push(`the player means ${e.remainingObjectives} objectives left`);
+  }
+  if (e.durationDays) {
+    understood.push(`the player means a campaign length of ${e.durationDays} days`);
+  }
 
   const system = [
     "You are Nova, a friendly mission companion in the AstroBase space game. The players are children aged 8 to 14.",
@@ -934,7 +1080,9 @@ function buildNovaPrompt(question, parsed, ctx) {
   const user = [
     "FACTS:",
     ...facts.map((f) => `- ${f}`),
-    understood.length ? `- Question understood as: ${understood.join("; ")}` : "",
+    understood.length
+      ? `- Question understood as: ${understood.join("; ")}`
+      : "",
     "",
     `Player question: ${normalizeForPrompt(question)}`,
   ]
@@ -944,21 +1092,18 @@ function buildNovaPrompt(question, parsed, ctx) {
   return { system, user };
 }
 
-const normalizeForPrompt = (q) => String(q ?? "").replace(/\[Current mission:[^\]]*\]/gi, "").trim();
+const normalizeForPrompt = (q) =>
+  String(q ?? "").replace(/\[Current mission:[^\]]*\]/gi, "").trim();
 
 // -----------------------------------------------------------------------------
 // Single entry point
 // -----------------------------------------------------------------------------
 
-/**
- * @returns {{ parsed, answer: string|null, prompt: {system,user}|null }}
- *   answer  -> send straight back to the player (no model call needed)
- *   prompt  -> send to Ollama when answer is null
- */
 function handleNovaQuestion(rawText, ctxIn = {}) {
   const ctx = withDefaults(ctxIn, rawText);
   const parsed = interpretQuestion(rawText, ctx);
   const answer = answerFromRules(parsed, ctx);
+
   return {
     parsed,
     answer,
@@ -970,46 +1115,57 @@ function handleNovaQuestion(rawText, ctxIn = {}) {
 // Helpers for server.js
 // -----------------------------------------------------------------------------
 
-/**
- * Cleans the state object sent by the browser. Never trust the client:
- * numbers are clamped, strings are shortened, unknown fields are dropped.
- */
 function contextFromClientState(raw, missionKey) {
   const r = raw && typeof raw === "object" ? raw : {};
+
   const num = (v, lo, hi) => {
     const n = Number(v);
     return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : undefined;
   };
+
   const mission = String(r.mission || missionKey || "").toLowerCase();
-  const ctx = { mission: mission === "moon" || mission === "mars" ? mission : null };
+
+  const ctx = {
+    mission: mission === "moon" || mission === "mars" ? mission : null,
+  };
 
   const campaignDays = num(r.campaignDays, 1, 365);
   if (campaignDays !== undefined) ctx.campaignDays = campaignDays;
+
   const day = num(r.day, 0, 365);
   if (day !== undefined) ctx.day = day;
+
   const score = num(r.score, -1e6, 1e6);
   if (score !== undefined) ctx.score = score;
 
   const resources = {};
+
   for (const key of RESOURCE_KEYS) {
     const v = num(r.resources?.[key] ?? r[key], 0, 100);
     if (v !== undefined) resources[key] = v;
   }
+
   ctx.resources = resources;
 
   if (r.objectives && typeof r.objectives === "object") {
     const total = num(r.objectives.total, 0, 1000);
     const done = num(r.objectives.done, 0, 1000);
-    if (total !== undefined) ctx.objectives = { total, done: done ?? 0 };
+
+    if (total !== undefined) {
+      ctx.objectives = { total, done: done ?? 0 };
+    }
   }
 
-  if (typeof r.missionStatus === "string" &&
-      ["active", "failed", "success"].includes(r.missionStatus)) {
+  if (
+    typeof r.missionStatus === "string" &&
+    ["active", "failed", "success"].includes(r.missionStatus)
+  ) {
     ctx.missionStatus = r.missionStatus;
   }
 
   if (r.survival && typeof r.survival === "object") {
     const survival = {};
+
     for (const [key, limits] of Object.entries({
       oxygen: [0, 100],
       health: [0, 100],
@@ -1019,48 +1175,96 @@ function contextFromClientState(raw, missionKey) {
       const value = num(r.survival[key], limits[0], limits[1]);
       if (value !== undefined) survival[key] = value;
     }
-    if (typeof r.survival.inZone === "boolean") survival.inZone = r.survival.inZone;
-    if (typeof r.survival.failed === "boolean") survival.failed = r.survival.failed;
+
+    if (typeof r.survival.inZone === "boolean") {
+      survival.inZone = r.survival.inZone;
+    }
+
+    if (typeof r.survival.failed === "boolean") {
+      survival.failed = r.survival.failed;
+    }
+
     if (["safe", "danger", "critical", "failed"].includes(r.survival.status)) {
       survival.status = r.survival.status;
     }
-    if (Object.keys(survival).length) ctx.survival = survival;
+
+    if (Object.keys(survival).length) {
+      ctx.survival = survival;
+    }
   }
 
-  ctx.tasks = (Array.isArray(r.tasks) ? r.tasks : []).slice(0, 60).map((t) => {
-    const task = {
-      id: String(t?.id ?? "").slice(0, 40),
-      day: num(t?.day, 0, 365),
-      title: String(t?.title ?? "").replace(/[\r\n]+/g, " ").slice(0, 80),
-      required: Boolean(t?.required),
-      status: t?.status === "done" ? "done" : "pending",
-    };
-    if (RES[t?.affects]) task.affects = t.affects;
-    const penalty = num(t?.penalty, 0, 100);
-    if (penalty !== undefined) task.penalty = penalty;
-    const bonus = num(t?.bonusScore, 0, 1000);
-    if (bonus !== undefined) task.bonusScore = bonus;
-    return task;
-  }).filter((t) => t.title && t.day !== undefined);
+  // Preserve the frontend's task list and include the current event's task
+  // when it has not already been supplied in r.tasks.
+  const rawTasks = Array.isArray(r.tasks) ? r.tasks : [];
+  const currentTask = r.currentEvent?.task;
+
+  const currentTaskEntry =
+    currentTask && typeof currentTask === "object"
+      ? {
+          id: r.currentEvent.id,
+          day: r.currentEvent.day ?? r.day,
+          title: currentTask.title,
+          required: Boolean(currentTask.required),
+          status: currentTask.status,
+          affects: r.currentEvent.type,
+          bonusScore: currentTask.bonusScore,
+        }
+      : null;
+
+  const hasCurrentTask =
+    currentTaskEntry &&
+    rawTasks.some(
+      (task) =>
+        task?.id === currentTaskEntry.id ||
+        task?.title === currentTaskEntry.title
+    );
+
+  const taskSource =
+    currentTaskEntry && !hasCurrentTask
+      ? [...rawTasks, currentTaskEntry]
+      : rawTasks;
+
+  ctx.tasks = taskSource
+    .slice(0, 60)
+    .map((t) => {
+      const task = {
+        id: String(t?.id ?? "").slice(0, 40),
+        day: num(t?.day, 0, 365),
+        title: String(t?.title ?? "")
+          .replace(/[\r\n]+/g, " ")
+          .slice(0, 80),
+        required: Boolean(t?.required),
+        status: t?.status === "done" ? "done" : "pending",
+      };
+
+      if (RES[t?.affects]) task.affects = t.affects;
+
+      const penalty = num(t?.penalty, 0, 100);
+      if (penalty !== undefined) task.penalty = penalty;
+
+      const bonus = num(t?.bonusScore, 0, 1000);
+      if (bonus !== undefined) task.bonusScore = bonus;
+
+      return task;
+    })
+    .filter((t) => t.title && t.day !== undefined);
 
   return ctx;
 }
 
-/**
- * Text to append to your existing system prompt before calling Ollama.
- * It adds the kid-friendly style, the reply language and the live mission facts.
- */
 function novaAddendum(rawText, ctxIn = {}) {
   const ctx = withDefaults(ctxIn, rawText);
   const parsed = interpretQuestion(rawText, ctx);
   const { user } = buildNovaPrompt(rawText, parsed, ctx);
   const factsBlock = user.split("\nPlayer question:")[0].trim();
+
   const style = [
     "Style for this answer: the players are children aged 8 to 14.",
     "Use short sentences and simple words, and explain WHY in one sentence.",
     `Reply in ${LANG_NAME[parsed.replyLanguage]}. Use at most 5 sentences.`,
     "For game rules and numbers, use only the game facts above and the live facts below. Never invent them.",
   ].join(" ");
+
   return `${style}\n${factsBlock}`;
 }
 
