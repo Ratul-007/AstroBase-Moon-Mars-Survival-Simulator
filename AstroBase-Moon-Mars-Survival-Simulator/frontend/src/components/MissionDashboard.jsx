@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { RESOURCE_META, resolveDecision } from "../game/missionEngine";
 import { useMissionSession } from "./MissionSessionContext";
 import MissionCertificate from "../components/MissionCertificate";
+import { useAudioManager } from "./AudioManager";
 
 // --------------------------------------------------
 // SPACE SCIENCE LEARNING INSIGHTS
@@ -234,6 +235,7 @@ function isPhysicalInteraction(entry) {
 
 function MissionDashboard({ onAbortMission }) {
   const navigate = useNavigate();
+  const { playSfx } = useAudioManager();
   const learningLogRef = useRef(null);
 
   const {
@@ -382,6 +384,7 @@ function MissionDashboard({ onAbortMission }) {
     };
 
     setMission(nextMission);
+    playSfx("confirm", { cooldown: 250 });
     setMissionLog((previous) => [...previous, logEntry]);
 
     setResolvedEvent({
@@ -431,6 +434,9 @@ function MissionDashboard({ onAbortMission }) {
           playerName: cleanedName,
           missionName: certificateMissionName,
           days: certificateDays,
+          missionStatus: mission.missionStatus,
+          objectivesCompleted: completedObjectives,
+          objectivesTotal: objectives.length,
           stats: certificateStats,
         },
       },

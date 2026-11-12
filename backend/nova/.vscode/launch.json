@@ -7,7 +7,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/server.js",
       "console": "integratedTerminal",
-      "env": { "PORT": "4173" }
+      "env": { "PORT": "8787" }
     }
   ]
 }

@@ -11,6 +11,7 @@ import { flushSync } from "react-dom";
 
 import MissionScene from "./3d/MissionScene";
 import MissionDashboard from "./MissionDashboard";
+import FpsButton from "./FpsButton";
 import NovaButton from "./nova/NovaButton";
 import NovaPanel from "./nova/NovaPanel";
 
@@ -21,8 +22,13 @@ import {
 
 import { useSurvivalZone } from "../survival/useSurvivalZone";
 import SurvivalHud from "../survival/SurvivalHud";
+import { useAudioManager } from "./AudioManager";
 
-function MissionExperienceContent({ planet }) {
+function MissionExperienceContent({
+  planet,
+  active = true,
+  onSceneReady,
+}) {
   const navigate = useNavigate();
 
   const {
@@ -33,6 +39,11 @@ function MissionExperienceContent({ planet }) {
     sessionVersion,
     handlePhysicalInteraction,
   } = useMissionSession();
+  const {
+    playSfx,
+    setGameplayActive,
+    setMissionComplete,
+  } = useAudioManager();
 
   const [novaOpen, setNovaOpen] = useState(false);
   const [failReason, setFailReason] = useState(null);
@@ -43,6 +54,8 @@ function MissionExperienceContent({ planet }) {
 
   const playerPosRef = useRef({ x: 0, z: 3 });
   const abortingRef = useRef(false);
+  const lastMissionStatusRef = useRef(mission.missionStatus);
+  const wasInSafeZoneRef = useRef(true);
 
   const worldConfig = useMemo(
     () => ({
@@ -56,6 +69,34 @@ function MissionExperienceContent({ planet }) {
   const isMissionOver =
     mission.missionStatus === "success" ||
     mission.missionStatus === "failed";
+
+  useEffect(() => {
+    setGameplayActive(active);
+    setMissionComplete(active && isMissionOver);
+
+    return () => {
+      setGameplayActive(false);
+      setMissionComplete(false);
+    };
+  }, [
+    active,
+    isMissionOver,
+    setGameplayActive,
+    setMissionComplete,
+  ]);
+
+  useEffect(() => {
+    const previousStatus = lastMissionStatusRef.current;
+    const nextStatus = mission.missionStatus;
+
+    if (previousStatus === "active" && nextStatus === "success") {
+      playSfx("confirm", { cooldown: 1000, volumeScale: 1.2 });
+    } else if (previousStatus === "active" && nextStatus === "failed") {
+      playSfx("error", { cooldown: 1000, volumeScale: 1.1 });
+    }
+
+    lastMissionStatusRef.current = nextStatus;
+  }, [mission.missionStatus, playSfx]);
 
   const showGameplay = !isMissionOver && !failReason;
 
@@ -87,6 +128,23 @@ function MissionExperienceContent({ planet }) {
       onFail: handleMissionFail,
     }
   );
+  const { setPaused: setSurvivalPaused } = survival;
+
+  useEffect(() => {
+    setSurvivalPaused(!active);
+  }, [active, setSurvivalPaused]);
+
+  useEffect(() => {
+    if (survival.inZone) {
+      wasInSafeZoneRef.current = true;
+      return;
+    }
+
+    if (wasInSafeZoneRef.current) {
+      playSfx("warning", { cooldown: 1500, volumeScale: 1.15 });
+      wasInSafeZoneRef.current = false;
+    }
+  }, [playSfx, survival.inZone]);
 
   const currentTask = mission.currentEvent?.task ?? null;
 
@@ -137,6 +195,24 @@ function MissionExperienceContent({ planet }) {
         target
       );
 
+      if (result?.success) {
+        playSfx(
+          interactionType === "supplies" || interactionType === "station"
+            ? "collect"
+            : "interaction",
+          {
+            cooldown: 180,
+            volumeScale:
+              interactionType === "supplies" ||
+              interactionType === "station"
+                ? 1.5
+                : 1,
+          }
+        );
+      } else if (result?.message) {
+        playSfx("error", { cooldown: 500, volumeScale: 0.7 });
+      }
+
       if (result?.message) {
         setToast({
           id: Date.now(),
@@ -149,6 +225,7 @@ function MissionExperienceContent({ planet }) {
       failReason,
       mission.missionStatus,
       handlePhysicalInteraction,
+      playSfx,
     ]
   );
 
@@ -202,8 +279,10 @@ function MissionExperienceContent({ planet }) {
         overflow: dashboardIsFullScreen ? "auto" : "hidden",
         background: "#070d1a",
         color: "#eef4ff",
-        fontFamily: "Arial, sans-serif",
+        fontFamily: "var(--font-body)",
         isolation: "isolate",
+        visibility: "visible",
+        pointerEvents: active ? "auto" : "none",
       }}
     >
       {showGameplay && (
@@ -219,15 +298,22 @@ function MissionExperienceContent({ planet }) {
           <MissionScene
             key={`${planet}-${sessionVersion}`}
             planet={planet}
+            active={active}
+            onReady={onSceneReady}
             playerPosRef={playerPosRef}
             survivalRef={survival.simRef}
             worldConfig={worldConfig}
             onPhysicalInteraction={handleWorldInteraction}
+            onFootstep={() =>
+              playSfx("footstep", { cooldown: 220, volumeScale: 0.9 })
+            }
             taskInfo={taskInfo}
             cameraMode={cameraMode}
           />
         </div>
       )}
+
+      {active && showGameplay && <FpsButton />}
 
       {showGameplay && toast && (
         <div
@@ -527,7 +613,7 @@ function MissionExperienceContent({ planet }) {
   );
 }
 
-function MissionExperience() {
+function MissionExperience({ active = true, onSceneReady }) {
   const location = useLocation();
 
   const planet =
@@ -535,7 +621,11 @@ function MissionExperience() {
 
   return (
     <MissionSessionProvider planet={planet}>
-      <MissionExperienceContent planet={planet} />
+      <MissionExperienceContent
+        planet={planet}
+        active={active}
+        onSceneReady={onSceneReady}
+      />
     </MissionSessionProvider>
   );
 }

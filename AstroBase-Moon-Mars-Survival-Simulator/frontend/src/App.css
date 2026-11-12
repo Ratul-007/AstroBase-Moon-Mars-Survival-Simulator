@@ -3,7 +3,65 @@
    GLOBAL BOX SIZING
 ========================= */
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+.audio-controls {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(125, 211, 252, 0.3);
+  border-radius: 12px;
+  background: rgba(5, 12, 30, 0.9);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+}
+
+.audio-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #eef4ff;
+  font-size: 0.82rem;
+}
+
+.audio-toggle:hover,
+.audio-toggle:focus-visible {
+  background: #162743;
+}
+
+.audio-volume {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #aebed6;
+  font-size: 0.75rem;
+}
+
+.audio-volume input {
+  width: 76px;
+  accent-color: #7dd3fc;
+}
+
+@media (max-width: 760px) {
+  .audio-controls {
+    right: 10px;
+    bottom: 10px;
+    max-width: calc(100vw - 20px);
+    overflow-x: auto;
+  }
+
+  .audio-toggle span,
+  .audio-volume span {
+    display: none;
+  }
+}
 
 *,
 *::before,
@@ -1552,10 +1610,11 @@
 
 .home-page .hero-text {
   max-width: 650px;
-  margin-top: 28px;
+  margin: 28px auto 0;
   color: #d0d9e7;
   font-size: clamp(1rem, 1.5vw, 1.12rem);
   line-height: 1.85;
+  text-align: center;
 }
 
 .home-page .hero-buttons {
@@ -1595,7 +1654,7 @@
 
 .home-page .hero-stats {
   width: min(720px, 100%);
-  margin-top: 62px;
+  margin: 62px auto 0;
   padding-top: 27px;
   border-top: 1px solid rgba(198, 218, 245, 0.23);
   gap: 0;
@@ -2420,7 +2479,7 @@
   }
 
   .home-page .hero-stats {
-    margin-top: 44px;
+    margin: 44px auto 0;
   }
 
   .home-page .mission-showcase,
@@ -2558,7 +2617,7 @@
   }
 
   .home-page .hero-stats {
-    margin-top: 38px;
+    margin: 38px auto 0;
     padding-top: 21px;
   }
 
@@ -4079,7 +4138,7 @@ button,
 input,
 textarea,
 select {
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font-body);
 }
 
 h1,
@@ -4088,7 +4147,7 @@ h3,
 h4,
 .hero-title,
 .section-heading h2 {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: -0.035em;
 }
@@ -4105,7 +4164,7 @@ a {
 .step-card-bottom,
 .systems-strip-title,
 .system-chip {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   letter-spacing: 0.06em;
 }
 
@@ -4138,7 +4197,7 @@ button,
   color: #dce7f5;
   border: 1px solid rgba(148, 180, 220, 0.35);
   border-radius: 8px;
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -4182,7 +4241,7 @@ button,
       transparent 48%
     ),
     var(--command-bg);
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font-body);
 }
 
 .mission-command-page *,
@@ -4220,7 +4279,7 @@ button,
   border: 1px solid rgba(145, 199, 255, 0.6);
   border-radius: 11px;
   color: var(--command-accent);
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: 24px;
   font-weight: 700;
 }
@@ -4231,7 +4290,7 @@ button,
 }
 
 .command-brand strong {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: 15px;
   letter-spacing: 0.12em;
 }
@@ -4239,7 +4298,7 @@ button,
 .command-brand small {
   margin-top: 5px;
   color: var(--command-muted);
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.07em;
 }
@@ -4251,7 +4310,7 @@ button,
   align-items: center;
   gap: 9px;
   color: #aabbd0;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 10px;
   letter-spacing: 0.08em;
 }
@@ -4279,7 +4338,7 @@ button,
   justify-content: center;
   gap: 12px;
   color: var(--command-accent);
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 11px;
   letter-spacing: 0.14em;
 }
@@ -4290,7 +4349,7 @@ button,
 
 .command-intro h1 {
   margin: 23px 0 16px;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(36px, 5.6vw, 68px);
   line-height: 1.08;
   font-weight: 600;
@@ -4316,7 +4375,7 @@ button,
   gap: 10px;
   margin-top: 27px;
   color: #7589a1;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.08em;
 }
@@ -4387,7 +4446,7 @@ button,
   background: rgba(5, 11, 20, 0.57);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 5px;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.08em;
   backdrop-filter: blur(8px);
@@ -4408,7 +4467,7 @@ button,
   top: 50%;
   left: 50%;
   color: rgba(255, 255, 255, 0.12);
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(44px, 7vw, 88px);
   font-weight: 700;
   letter-spacing: 0.16em;
@@ -4424,7 +4483,7 @@ button,
 .campaign-classification {
   margin: 0 0 10px;
   color: #b8d9ff;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 10px;
   letter-spacing: 0.14em;
 }
@@ -4432,7 +4491,7 @@ button,
 .campaign-title-block h2 {
   margin: 0;
   color: #fff;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(29px, 3.5vw, 43px);
   line-height: 1.1;
   font-weight: 600;
@@ -4442,7 +4501,7 @@ button,
 .campaign-subtitle {
   margin: 9px 0 0;
   color: #c5d3e2;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.11em;
 }
@@ -4485,7 +4544,7 @@ button,
 .campaign-spec span {
   margin-bottom: 8px;
   color: #7488a0;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 8px;
   letter-spacing: 0.06em;
 }
@@ -4521,7 +4580,7 @@ button,
 .campaign-objective div > span {
   margin-bottom: 5px;
   color: #839ab4;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 8px;
   letter-spacing: 0.08em;
 }
@@ -4538,7 +4597,7 @@ button,
 
 .hazards-label {
   color: #8395aa;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.09em;
 }
@@ -4571,7 +4630,7 @@ button,
   background: #a9d2ff;
   border: 1px solid #a9d2ff;
   border-radius: 6px;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.07em;
@@ -4629,14 +4688,14 @@ button,
 .protocol-heading p {
   margin: 0 0 5px;
   color: #8ca6c3;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 8px;
   letter-spacing: 0.08em;
 }
 
 .protocol-heading h2 {
   margin: 0;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: 15px;
   line-height: 1.4;
 }
@@ -4649,7 +4708,7 @@ button,
 
 .protocol-item > span {
   color: var(--command-accent);
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 11px;
 }
 
@@ -4686,7 +4745,7 @@ button,
   color: #9aadc3;
   background: transparent;
   border: 0;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 10px;
   letter-spacing: 0.07em;
   cursor: pointer;
@@ -4704,7 +4763,7 @@ button,
 .command-footer > p {
   margin: 0;
   color: #64768b;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 8px;
   line-height: 1.7;
   letter-spacing: 0.07em;
@@ -4850,7 +4909,7 @@ button,
   background:
     radial-gradient(ellipse at 80% 5%, rgba(48, 99, 151, 0.13), transparent 38%),
     var(--prelaunch-bg);
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font-body);
 }
 
 .prelaunch-page *,
@@ -4892,7 +4951,7 @@ button,
   border: 1px solid var(--prelaunch-accent);
   border-radius: 10px;
   color: var(--prelaunch-accent);
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: 23px;
   font-weight: 700;
 }
@@ -4903,7 +4962,7 @@ button,
 }
 
 .prelaunch-brand-copy strong {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: 14px;
   letter-spacing: 0.12em;
 }
@@ -4911,7 +4970,7 @@ button,
 .prelaunch-brand-copy small {
   margin-top: 5px;
   color: var(--prelaunch-muted);
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 8px;
   letter-spacing: 0.07em;
 }
@@ -4921,7 +4980,7 @@ button,
   align-items: center;
   gap: 9px;
   color: #a7b9ce;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.08em;
 }
@@ -4958,7 +5017,7 @@ button,
   flex-wrap: wrap;
   gap: 11px;
   color: #8da5c0;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.1em;
 }
@@ -4966,14 +5025,14 @@ button,
 .prelaunch-classification {
   margin: 34px 0 10px;
   color: var(--prelaunch-accent);
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 10px;
   letter-spacing: 0.15em;
 }
 
 .prelaunch-hero h1 {
   margin: 0;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(42px, 5vw, 67px);
   font-weight: 600;
   line-height: 1.05;
@@ -4983,7 +5042,7 @@ button,
 .prelaunch-subtitle {
   margin: 14px 0 0;
   color: #b7c8dc;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 10px;
   letter-spacing: 0.11em;
 }
@@ -5017,7 +5076,7 @@ button,
 .prelaunch-hero-meta span {
   margin-bottom: 7px;
   color: #8295ad;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 8px;
   letter-spacing: 0.07em;
 }
@@ -5162,7 +5221,7 @@ button,
 .prelaunch-eyebrow {
   margin: 0 0 9px;
   color: var(--prelaunch-accent);
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.12em;
 }
@@ -5170,7 +5229,7 @@ button,
 .prelaunch-section-heading h2,
 .prelaunch-launch-copy h2 {
   margin: 0;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(23px, 3vw, 31px);
   font-weight: 600;
   letter-spacing: -0.04em;
@@ -5178,7 +5237,7 @@ button,
 
 .prelaunch-section-code {
   color: #7589a1;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.07em;
   text-align: right;
@@ -5210,7 +5269,7 @@ button,
 .prelaunch-panel-label {
   margin: 2px 0 9px;
   color: #91a9c4;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.1em;
 }
@@ -5262,7 +5321,7 @@ button,
 
 .prelaunch-resource-status {
   color: #80d7a1;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 7px;
   letter-spacing: 0.04em;
 }
@@ -5285,7 +5344,7 @@ button,
 
 .prelaunch-resource-value strong {
   color: #edf4fc;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(23px, 2.4vw, 31px);
   font-weight: 600;
   letter-spacing: -0.04em;
@@ -5298,7 +5357,7 @@ button,
 
 .prelaunch-resource-unit {
   color: #64788f;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 7px;
   letter-spacing: 0.04em;
 }
@@ -5354,7 +5413,7 @@ button,
   display: block;
   margin-bottom: 3px;
   color: #f2c57f;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.07em;
 }
@@ -5433,7 +5492,7 @@ button,
 }
 
 .prelaunch-launch-text strong {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 11px;
   letter-spacing: 0.08em;
 }
@@ -5466,7 +5525,7 @@ button,
   color: #9aadc3;
   background: transparent;
   border: 0;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.07em;
   cursor: pointer;
@@ -5483,7 +5542,7 @@ button,
 
 .prelaunch-footer-status {
   color: #657b94;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 8px;
   letter-spacing: 0.06em;
 }
@@ -6002,9 +6061,12 @@ body {
 }
 
 /* ---------- MISSION BRIEFING page ---------- */
-.briefing-planet-moon,
-.briefing-card-planet-moon {
+.briefing-planet-moon {
   background: url("/images/moon-globe.jpg") center / cover no-repeat;
+}
+
+.briefing-card-planet-moon {
+  background: url("/images/moonglobe.jpg") center / cover no-repeat;
 }
 
 .briefing-planet-mars,
@@ -6019,7 +6081,7 @@ body {
   font-size: 0;
   line-height: 0;
   color: transparent;
-  background: url("/images/moon-globe.jpg") center / cover no-repeat;
+  background: url("/images/moonglobe.jpg") center / cover no-repeat;
   box-shadow:
     inset -24px -14px 40px rgba(0, 0, 0, 0.45),
     0 0 60px rgba(130, 180, 232, 0.18);

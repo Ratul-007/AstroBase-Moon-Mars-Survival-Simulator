@@ -11,30 +11,30 @@ function App() {
     <BrowserRouter>
       <Routes>
 
-        <Route
-          path="/"
-          element={<Home />}
-        />
+          <Route
+            path="/"
+            element={<Home />}
+          />
 
-        <Route
-          path="/missions"
-          element={<MissionSelect />}
-        />
+          <Route
+            path="/missions"
+            element={<MissionSelect />}
+          />
 
-        <Route
-          path="/mission/moon"
-          element={<MissionSetup />}
-        />
+          <Route
+            path="/mission/moon"
+            element={<MissionSetup />}
+          />
 
-        <Route
-          path="/mission/mars"
-          element={<MissionSetup />}
-        />
+          <Route
+            path="/mission/mars"
+            element={<MissionSetup />}
+          />
 
-        <Route
-          path="/mission"
-          element={<MissionDashboard />}
-        />
+          <Route
+            path="/mission"
+            element={<MissionDashboard />}
+          />
 
       </Routes>
     </BrowserRouter>

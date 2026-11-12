@@ -1027,7 +1027,29 @@ function contextFromClientState(raw, missionKey) {
     if (Object.keys(survival).length) ctx.survival = survival;
   }
 
-  ctx.tasks = (Array.isArray(r.tasks) ? r.tasks : []).slice(0, 60).map((t) => {
+  const rawTasks = Array.isArray(r.tasks) ? r.tasks : [];
+  const currentTask = r.currentEvent?.task;
+  const currentTaskEntry = currentTask && typeof currentTask === "object"
+    ? {
+        id: r.currentEvent.id,
+        day: r.currentEvent.day ?? r.day,
+        title: currentTask.title,
+        required: Boolean(currentTask.required),
+        status: currentTask.status,
+        affects: r.currentEvent.type,
+        bonusScore: currentTask.bonusScore,
+      }
+    : null;
+  const hasCurrentTask = currentTaskEntry &&
+    rawTasks.some((task) =>
+      task?.id === currentTaskEntry.id ||
+      task?.title === currentTaskEntry.title
+    );
+  const taskSource = currentTaskEntry && !hasCurrentTask
+    ? [...rawTasks, currentTaskEntry]
+    : rawTasks;
+
+  ctx.tasks = taskSource.slice(0, 60).map((t) => {
     const task = {
       id: String(t?.id ?? "").slice(0, 40),
       day: num(t?.day, 0, 365),
