@@ -11,7 +11,7 @@
   padding: 0 clamp(18px, 5vw, 76px) 40px;
   color: var(--lp-text);
   background: transparent;
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font-body);
 }
 
 .liveproof-page *,
@@ -49,7 +49,7 @@
   border: 1px solid rgba(139, 220, 255, 0.6);
   border-radius: 11px;
   color: var(--lp-accent);
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: 24px;
   font-weight: 700;
 }
@@ -60,7 +60,7 @@
 }
 
 .liveproof-brand strong {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: 15px;
   letter-spacing: 0.12em;
 }
@@ -68,7 +68,7 @@
 .liveproof-brand small {
   margin-top: 5px;
   color: var(--lp-muted);
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.07em;
 }
@@ -78,7 +78,7 @@
   align-items: center;
   gap: 9px;
   color: #aabbd0;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 10px;
   letter-spacing: 0.08em;
 }
@@ -102,14 +102,14 @@
 .liveproof-eyebrow {
   margin: 0;
   color: var(--lp-accent);
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 11px;
   letter-spacing: 0.14em;
 }
 
 .liveproof-intro h1 {
   margin: 22px 0 16px;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(36px, 5.6vw, 66px);
   font-weight: 600;
   line-height: 1.08;
@@ -149,7 +149,7 @@
 .liveproof-reload,
 .liveproof-footer button,
 .liveproof-error button {
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font-body);
   font-weight: 600;
   cursor: pointer;
 }
@@ -207,14 +207,14 @@
   gap: 10px;
   margin-bottom: 18px;
   color: #8ca6c3;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 10px;
   letter-spacing: 0.08em;
 }
 
 .liveproof-card h2 {
   margin: 0 0 10px;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(22px, 2.6vw, 28px);
   font-weight: 600;
   letter-spacing: -0.03em;
@@ -288,7 +288,7 @@
 .liveproof-facts dt {
   flex-shrink: 0;
   color: #7f93ab;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 10px;
   letter-spacing: 0.06em;
 }
@@ -366,7 +366,7 @@
   border-radius: 8px;
   background: rgba(3, 7, 16, 0.8);
   color: #a9c3de;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 11px;
   line-height: 1.6;
   white-space: pre-wrap;
@@ -393,7 +393,7 @@
   padding: 10px 12px 10px 0;
   border-bottom: 1px solid var(--lp-border);
   color: #7f93ab;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.06em;
@@ -409,7 +409,7 @@
 
 .liveproof-url {
   max-width: 460px;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 11px;
   overflow-wrap: anywhere;
 }
@@ -443,7 +443,7 @@
 
 .liveproof-verify h3 {
   margin: 0 0 10px;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: 16px;
 }
 
@@ -563,7 +563,7 @@
   border-radius: 7px;
   background: transparent;
   color: #d7c9ff;
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font-body);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;

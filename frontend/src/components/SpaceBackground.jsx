@@ -16,6 +16,10 @@ export default function SpaceBackground({
         src={`${base}images/earth.jpg`}
         alt=""
         aria-hidden="true"
+        loading="lazy"
+        decoding="async"
+        width="1280"
+        height="1280"
       />
 
       <img
@@ -23,6 +27,10 @@ export default function SpaceBackground({
         src={`${base}images/jupiter.jpg`}
         alt=""
         aria-hidden="true"
+        loading="lazy"
+        decoding="async"
+        width="840"
+        height="840"
       />
 
       <img
@@ -30,6 +38,10 @@ export default function SpaceBackground({
         src={`${base}images/saturn.jpg`}
         alt=""
         aria-hidden="true"
+        loading="lazy"
+        decoding="async"
+        width="400"
+        height="174"
       />
     </>
   );

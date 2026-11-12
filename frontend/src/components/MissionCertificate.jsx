@@ -188,7 +188,7 @@ function MissionCertificate({
             outlineOffset: "-12px",
             color: "#f8fafc",
             textAlign: "center",
-            fontFamily: "Arial, Helvetica, sans-serif",
+            fontFamily: "var(--font-body)",
           }}
         >
           <div

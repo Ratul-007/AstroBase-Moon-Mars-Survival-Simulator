@@ -201,6 +201,8 @@ export function TaskStationMarker({ step }) {
   const ringMaterial = useRef();
 
   useFrame(({ clock }) => {
+    if (!step?.position) return;
+
     const pulse = Math.sin(clock.elapsedTime * 2.2);
 
     if (beamMaterial.current) {
@@ -276,10 +278,12 @@ export function TaskStationMarker({ step }) {
  */
 export function ObjectiveGuide({ taskInfo, playerPosRef }) {
   const [guide, setGuide] = useState(null);
+  const lastGuideRef = useRef(null);
   const step = taskInfo?.step ?? null;
 
   useEffect(() => {
     if (!step?.position) {
+      lastGuideRef.current = null;
       setGuide(null);
       return undefined;
     }
@@ -291,10 +295,22 @@ export function ObjectiveGuide({ taskInfo, playerPosRef }) {
       const dx = step.position.x - player.x;
       const dz = step.position.z - player.z;
 
-      setGuide({
+      const nextGuide = {
         distance: Math.round(Math.hypot(dx, dz)),
         angle: (Math.atan2(dx, -dz) * 180) / Math.PI,
-      });
+      };
+
+      const previousGuide = lastGuideRef.current;
+      if (
+        previousGuide &&
+        previousGuide.distance === nextGuide.distance &&
+        previousGuide.angle === nextGuide.angle
+      ) {
+        return;
+      }
+
+      lastGuideRef.current = nextGuide;
+      setGuide(nextGuide);
     };
 
     update();
@@ -325,7 +341,7 @@ export function ObjectiveGuide({ taskInfo, playerPosRef }) {
         border: `1px solid ${red ? "rgba(251,146,60,0.7)" : "rgba(125,211,252,0.6)"}`,
         background: "rgba(5, 12, 25, 0.92)",
         color: "#f8fafc",
-        fontFamily: "Arial, sans-serif",
+        fontFamily: "var(--font-body)",
         boxShadow: "0 8px 28px rgba(0, 0, 0, 0.4)",
         pointerEvents: "none",
         textAlign: "center",

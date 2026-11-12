@@ -43,7 +43,17 @@ function NovaButton({ onClick, unread = false }) {
       title="Nova AI Companion (drag to move)"
       aria-label="Open Nova AI Companion"
     >
-      ✦
+      <img
+        src="/images/nova-logo.png"
+        alt=""
+        aria-hidden="true"
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+          display: "block",
+        }}
+      />
 
       {unread && (
         <span

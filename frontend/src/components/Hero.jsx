@@ -14,6 +14,7 @@ function Hero() {
         muted
         loop
         playsInline
+        preload="metadata"
         aria-hidden="true"
       />
 

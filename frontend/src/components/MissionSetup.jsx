@@ -1,6 +1,7 @@
 
 import { useLocation, useNavigate } from "react-router-dom";
 import { INITIAL_RESOURCES, RESOURCE_META } from "../game/missionEngine";
+import { loadLaunchGate } from "../routeLoaders";
 
 function MissionSetup() {
   const location = useLocation();
@@ -42,6 +43,12 @@ function MissionSetup() {
     key.charAt(0).toUpperCase() + key.slice(1);
 
   const handleBeginMission = () => {
+    try {
+      window.sessionStorage.removeItem("astrobase:certificate:v1");
+    } catch {
+      // A storage failure must not block mission launch.
+    }
+
     navigate("/mission", {
       state: {
         planet: mission.route,
@@ -253,6 +260,8 @@ function MissionSetup() {
             type="button"
             className="prelaunch-launch-btn"
             onClick={handleBeginMission}
+            onMouseEnter={loadLaunchGate}
+            onFocus={loadLaunchGate}
           >
             <span className="prelaunch-launch-icon" aria-hidden="true">
               🚀

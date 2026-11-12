@@ -202,7 +202,9 @@ function PlayerController({
   interactionTargets = [],
   onPhysicalInteraction,
   onInteractionPromptChange,
+  onFootstep,
   cameraMode = "follow",
+  enabled = true,
 }) {
   const playerRef = useRef();
 
@@ -232,6 +234,7 @@ function PlayerController({
   const nearestInteractionRef = useRef(null);
   const lastPromptIdRef = useRef(null);
   const interactionCheckTimerRef = useRef(0);
+  const lastFootstepCycleRef = useRef(0);
   const positionSnapshotRef = useRef({ x: 0, z: 3 });
   const orbitRef = useRef({
     yaw: 0,
@@ -383,6 +386,16 @@ function PlayerController({
     const player = playerRef.current;
     if (!player) return;
 
+    if (!enabled) {
+      keysRef.current.clear();
+      pressedKeysRef.current.clear();
+      velocityRef.current = { x: 0, z: 0 };
+      movement.current.moving = false;
+      movement.current.running = false;
+      onInteractionPromptChange?.(null);
+      return;
+    }
+
     const delta = Math.min(rawDelta, 0.05);
     const keys = keysRef.current;
 
@@ -425,6 +438,19 @@ function PlayerController({
     movement.current.running = wantsRun && isMoving;
     movement.current.moveX = isMoving ? velocity.x / currentSpeed : 0;
     movement.current.moveZ = isMoving ? velocity.z / currentSpeed : 0;
+
+    if (!isMoving) {
+      lastFootstepCycleRef.current = movement.current.walkCycle;
+    } else {
+      const stepInterval = wantsRun ? 4.8 : 3.8;
+      if (
+        movement.current.walkCycle - lastFootstepCycleRef.current >=
+        stepInterval
+      ) {
+        lastFootstepCycleRef.current = movement.current.walkCycle;
+        onFootstep?.(wantsRun ? "run" : "walk");
+      }
+    }
 
     if (isMoving) {
       movement.current.walkCycle +=

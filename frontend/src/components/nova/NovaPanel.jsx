@@ -160,11 +160,20 @@ function NovaPanel({ planet = "moon", survivalState, onClose }) {
   };
 
   return (
-    <section
-      role="dialog"
-      aria-label="Nova AI Companion chat"
-      style={panelStyle}
-    >
+    <>
+      <style>
+        {`
+          .nova-message-input:focus-visible {
+            outline: 2px solid #7dd3fc;
+            outline-offset: 2px;
+          }
+        `}
+      </style>
+      <section
+        role="dialog"
+        aria-label="Nova AI Companion chat"
+        style={panelStyle}
+      >
       <header
         style={{
           padding: "16px",
@@ -176,19 +185,38 @@ function NovaPanel({ planet = "moon", survivalState, onClose }) {
           gap: "12px",
         }}
       >
-        <div>
-          <strong style={{ color: "#7dd3fc", fontSize: "16px" }}>
-            ✦ NOVA
-          </strong>
-
-          <div
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <img
+            src="/images/nova-logo.png"
+            alt="NOVA"
             style={{
-              fontSize: "12px",
-              color: "#94a3b8",
-              marginTop: "4px",
+              width: "28px",
+              height: "28px",
+              objectFit: "contain",
+              display: "block",
             }}
-          >
-            {planet === "mars" ? "MARS" : "MOON"} MISSION COMPANION
+          />
+
+          <div>
+            <strong style={{ color: "#7dd3fc", fontSize: "16px" }}>
+              NOVA
+            </strong>
+
+            <div
+              style={{
+                fontSize: "12px",
+                color: "#94a3b8",
+                marginTop: "4px",
+              }}
+            >
+              {planet === "mars" ? "MARS" : "MOON"} MISSION COMPANION
+            </div>
           </div>
         </div>
 
@@ -306,6 +334,7 @@ function NovaPanel({ planet = "moon", survivalState, onClose }) {
         }}
       >
         <input
+          className="nova-message-input"
           type="text"
           value={input}
           onChange={(event) => setInput(event.target.value)}
@@ -325,7 +354,6 @@ function NovaPanel({ planet = "moon", survivalState, onClose }) {
             border: "1px solid #475569",
             background: "#070d1a",
             color: "#eef4ff",
-            outline: "none",
             fontSize: "14px",
           }}
         />
@@ -348,7 +376,8 @@ function NovaPanel({ planet = "moon", survivalState, onClose }) {
           {loading ? "..." : "Send"}
         </button>
       </form>
-    </section>
+      </section>
+    </>
   );
 }
 

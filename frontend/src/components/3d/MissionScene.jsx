@@ -1,13 +1,15 @@
-import { memo, useMemo, useRef, useState } from "react";
+
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+
 import PlayerController from "./PlayerController";
 import { TaskStationMarker, ObjectiveGuide } from "./TaskStations";
 import MissionMap from "../MissionMap";
+import PerseveranceRover from "./PerseveranceRover";
+import NasaModel from "./NasaModel";
 
 const CHUNK_SIZE = 48;
-// Keep nearby terrain detailed without creating hundreds of off-screen
-// objects and shadow casters every frame.
 const CHUNK_RADIUS = 2;
 const CHUNK_SEGMENTS = 12;
 
@@ -16,6 +18,18 @@ const DEFAULT_WORLD_CONFIG = {
   safeZoneRadius: 24,
   safeZoneCenter: { x: 0, z: 0 },
 };
+
+function SceneReadyReporter({ onReady }) {
+  const readyRef = useRef(false);
+
+  useFrame(() => {
+    if (readyRef.current) return;
+    readyRef.current = true;
+    onReady?.();
+  });
+
+  return null;
+}
 
 export const INTERACTION_TARGETS = [
   {
@@ -379,9 +393,7 @@ function Terrain({ mars }) {
           position={[x, 0.028, z]}
         >
           <mesh rotation={[-Math.PI / 2, 0, 0]}>
-            <ringGeometry
-              args={[radius * 0.65, radius, 40]}
-            />
+            <ringGeometry args={[radius * 0.65, radius, 40]} />
             <meshStandardMaterial
               color={craterColor}
               roughness={1}
@@ -426,246 +438,53 @@ function Terrain({ mars }) {
   );
 }
 
-function Habitat({ mars }) {
-  const bodyColor = mars ? "#d3c4b5" : "#c7d1dc";
-  const roofColor = mars ? "#d6a08b" : "#8dc9e8";
-
+// NASA Base Station model replaces the previous procedural habitat.
+// Original habitat position is preserved.
+function Habitat() {
   return (
-    <group position={[0, 0, 0]}>
-      <mesh position={[0, 1.05, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[1.15, 1.15, 1.8, 32]} />
-        <meshStandardMaterial
-          color={bodyColor}
-          metalness={0.3}
-          roughness={0.55}
-        />
-      </mesh>
-
-      <mesh position={[0, 2.05, 0]} castShadow>
-        <sphereGeometry
-          args={[1.12, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2]}
-        />
-        <meshStandardMaterial
-          color={roofColor}
-          metalness={0.2}
-          roughness={0.35}
-        />
-      </mesh>
-
-      <mesh position={[0, 0.65, 1.16]} castShadow>
-        <boxGeometry args={[0.48, 1.15, 0.12]} />
-        <meshStandardMaterial color="#263a50" />
-      </mesh>
-
-      <mesh position={[0, 1.25, 1.2]}>
-        <boxGeometry args={[0.6, 0.08, 0.15]} />
-        <meshStandardMaterial
-          color="#e4edf5"
-          metalness={0.25}
-        />
-      </mesh>
-
-      <mesh position={[0.62, 1.45, 0.99]}>
-        <boxGeometry args={[0.36, 0.35, 0.08]} />
-        <meshStandardMaterial
-          color="#43b9f5"
-          metalness={0.3}
-          roughness={0.2}
-          emissive="#12364d"
-          emissiveIntensity={0.7}
-        />
-      </mesh>
-
-      {[-1.4, 1.4].map((x) => (
-        <mesh key={x} position={[x, 0.65, 0]} castShadow>
-          <cylinderGeometry args={[0.28, 0.28, 1.2, 20]} />
-          <meshStandardMaterial
-            color="#8795a5"
-            metalness={0.5}
-            roughness={0.5}
-          />
-        </mesh>
-      ))}
-
-      <mesh position={[0, 0.12, 0]} receiveShadow>
-        <cylinderGeometry args={[1.35, 1.4, 0.2, 32]} />
-        <meshStandardMaterial
-          color="#526170"
-          metalness={0.4}
-          roughness={0.65}
-        />
-      </mesh>
-
-      {[-0.55, 0, 0.55].map((x, index) => (
-        <mesh
-          key={`status-${index}`}
-          position={[x, 1.82, 1.01]}
-        >
-          <sphereGeometry args={[0.045, 10, 10]} />
-          <meshStandardMaterial
-            color={index === 1 ? "#facc15" : "#4ade80"}
-            emissive={index === 1 ? "#ca8a04" : "#15803d"}
-            emissiveIntensity={0.8}
-          />
-        </mesh>
-      ))}
-    </group>
+    <NasaModel
+      path="/models/nasa/base-station.glb"
+      targetSize={4.0}
+      position={[0, 0, 0]}
+      rotation={[0, 0, 0]}
+    />
   );
 }
 
+// NASA ACRIMSAT satellite visual.
 function SolarArray({ position }) {
   return (
-    <group position={position}>
-      <mesh position={[0, 0.55, 0]} castShadow>
-        <cylinderGeometry args={[0.07, 0.09, 1.1, 12]} />
-        <meshStandardMaterial
-          color="#b8c4d0"
-          metalness={0.6}
-          roughness={0.45}
-        />
-      </mesh>
-
-      {[-0.65, 0.65].map((x) => (
-        <group key={x} position={[x, 1, 0]}>
-          <mesh rotation={[0, 0, -0.08]} castShadow>
-            <boxGeometry args={[1.1, 0.07, 1.5]} />
-            <meshStandardMaterial
-              color="#aeb9c7"
-              metalness={0.45}
-              roughness={0.45}
-            />
-          </mesh>
-
-          <mesh position={[0, 0.055, 0]}>
-            <boxGeometry args={[1, 0.035, 1.38]} />
-            <meshStandardMaterial
-              color="#153e79"
-              metalness={0.45}
-              roughness={0.35}
-            />
-          </mesh>
-
-          {[-0.25, 0, 0.25].map((z) => (
-            <mesh key={`h-${z}`} position={[0, 0.078, z]}>
-              <boxGeometry args={[1, 0.012, 0.018]} />
-              <meshStandardMaterial color="#72c9ff" />
-            </mesh>
-          ))}
-
-          {[-0.25, 0, 0.25].map((xLine) => (
-            <mesh
-              key={`v-${xLine}`}
-              position={[xLine, 0.079, 0]}
-            >
-              <boxGeometry args={[0.015, 0.012, 1.35]} />
-              <meshStandardMaterial color="#72c9ff" />
-            </mesh>
-          ))}
-        </group>
-      ))}
-    </group>
+    <NasaModel
+      path="/models/nasa/acrimsat-a.glb"
+      targetSize={3.2}
+      position={position}
+      rotation={[0, 0, 0]}
+    />
   );
 }
 
-function Rover({ mars }) {
+// NASA Perseverance rover visual.
+function Rover() {
   return (
-    <group position={[2.5, 0, 1.6]} rotation={[0, -0.35, 0]}>
-      <mesh position={[0, 0.65, 0]} castShadow receiveShadow>
-        <boxGeometry args={[1.1, 0.38, 0.8]} />
-        <meshStandardMaterial
-          color={mars ? "#d78c48" : "#e0a94d"}
-          metalness={0.35}
-          roughness={0.5}
-        />
-      </mesh>
-
-      <mesh position={[0, 0.95, -0.05]} castShadow>
-        <boxGeometry args={[0.4, 0.2, 0.35]} />
-        <meshStandardMaterial
-          color="#d8e2ec"
-          metalness={0.25}
-          roughness={0.45}
-        />
-      </mesh>
-
-      {[-1, 1].flatMap((side) =>
-        [-1, 1, 0].map((offset, index) => (
-          <mesh
-            key={`${side}-${index}`}
-            position={[
-              side * 0.58,
-              0.32,
-              offset === 0 ? 0 : offset * 0.3,
-            ]}
-            rotation={[0, 0, Math.PI / 2]}
-            castShadow
-          >
-            <cylinderGeometry args={[0.2, 0.2, 0.13, 20]} />
-            <meshStandardMaterial
-              color="#252d37"
-              roughness={0.9}
-            />
-          </mesh>
-        ))
-      )}
-
-      <mesh position={[0.25, 1.15, 0]} castShadow>
-        <cylinderGeometry args={[0.025, 0.025, 0.55, 10]} />
-        <meshStandardMaterial color="#dbe5ef" metalness={0.5} />
-      </mesh>
-
-      <mesh position={[0, 0.7, 0.42]}>
-        <boxGeometry args={[0.18, 0.09, 0.035]} />
-        <meshStandardMaterial
-          color="#fff1b8"
-          emissive="#fbbf24"
-          emissiveIntensity={0.65}
-        />
-      </mesh>
+    <group
+      position={[2.5, 0, 1.6]}
+      rotation={[0, -0.35, 0]}
+    >
+      <PerseveranceRover />
     </group>
   );
 }
 
+// NASA Crew Lock Bag visual.
 function SupplyCache({ mars }) {
   return (
     <group position={[5.5, 0, -3.5]}>
-      <mesh position={[0, 0.38, 0]} castShadow receiveShadow>
-        <boxGeometry args={[0.9, 0.72, 0.72]} />
-        <meshStandardMaterial
-          color={mars ? "#b96c4e" : "#8b9aab"}
-          metalness={0.25}
-          roughness={0.7}
-        />
-      </mesh>
-
-      <mesh position={[0, 0.39, 0.37]}>
-        <boxGeometry args={[0.62, 0.12, 0.035]} />
-        <meshStandardMaterial
-          color="#facc15"
-          emissive="#8a5b0a"
-          emissiveIntensity={0.25}
-        />
-      </mesh>
-
-      {[-0.32, 0.32].map((x) => (
-        <mesh
-          key={x}
-          position={[x, 0.38, 0.38]}
-          castShadow
-        >
-          <boxGeometry args={[0.06, 0.8, 0.06]} />
-          <meshStandardMaterial color="#d7e0ea" />
-        </mesh>
-      ))}
-
-      <mesh position={[0, 0.78, 0]} castShadow>
-        <boxGeometry args={[0.94, 0.08, 0.76]} />
-        <meshStandardMaterial
-          color="#d8e2ec"
-          metalness={0.35}
-          roughness={0.55}
-        />
-      </mesh>
+      <NasaModel
+        path="/models/nasa/crew-lock-bag.glb"
+        targetSize={1.1}
+        position={[0, 0, 0]}
+        rotation={[0, 0, 0]}
+      />
 
       <pointLight
         position={[0, 1.15, 0]}
@@ -792,10 +611,13 @@ function Outpost({ mars }) {
   return (
     <group>
       <Terrain mars={mars} />
-      <Habitat mars={mars} />
+
+      <Habitat />
+
       <SolarArray position={[-2.2, 0, 1.1]} />
       <SolarArray position={[-2.2, 0, 2.7]} />
-      <Rover mars={mars} />
+
+      <Rover />
       <SupplyCache mars={mars} />
       <CommunicationAntenna mars={mars} />
     </group>
@@ -804,10 +626,13 @@ function Outpost({ mars }) {
 
 function MissionScene({
   planet = "moon",
+  active = true,
+  onReady,
   playerPosRef,
   survivalRef,
   worldConfig = DEFAULT_WORLD_CONFIG,
   onPhysicalInteraction,
+  onFootstep,
   taskInfo = null,
   cameraMode = "follow",
 }) {
@@ -868,7 +693,7 @@ function MissionScene({
     }`,
     borderRadius: 10,
     padding: "12px 16px",
-    fontFamily: "Arial, sans-serif",
+    fontFamily: "var(--font-body)",
     pointerEvents: "none",
     backdropFilter: "blur(8px)",
     boxShadow: "0 8px 24px rgba(0, 0, 0, 0.18)",
@@ -886,6 +711,7 @@ function MissionScene({
       }}
     >
       <Canvas
+        frameloop={active ? "always" : "demand"}
         shadows
         dpr={[1, 1.25]}
         gl={{
@@ -901,6 +727,7 @@ function MissionScene({
       >
         <color attach="background" args={[skyColor]} />
         <fog attach="fog" args={[skyColor, 55, 145]} />
+        <SceneReadyReporter onReady={onReady} />
 
         <StarField mars={mars} />
 
@@ -970,12 +797,13 @@ function MissionScene({
           worldRadius={worldRadius}
           interactionTargets={interactionTargets}
           onPhysicalInteraction={onPhysicalInteraction}
+          onFootstep={onFootstep}
           onInteractionPromptChange={setInteractionPrompt}
           cameraMode={cameraMode}
+          enabled={active}
         />
       </Canvas>
 
-      {/* Mini-map overlay: MissionMap controls its own position. */}
       <MissionMap
         playerPosRef={playerPosRef}
         survivalRef={survivalRef}
@@ -1014,7 +842,7 @@ function MissionScene({
             background: "rgba(5, 12, 25, 0.94)",
             color: "#f8fafc",
             textAlign: "center",
-            fontFamily: "Arial, sans-serif",
+            fontFamily: "var(--font-body)",
             boxShadow: "0 8px 28px rgba(0, 0, 0, 0.4)",
             pointerEvents: "none",
           }}
