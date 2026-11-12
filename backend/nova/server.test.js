@@ -113,6 +113,177 @@ async function run() {
     assert.match(state.body.reply, /power 12/i);
     assert.doesNotMatch(state.body.reply, /can't read your live numbers/i);
 
+    const currentState = await request({
+      message: "[Current mission: Moon] What is my current state?",
+      state: {
+        mission: "moon",
+        campaignDays: 20,
+        day: 2,
+        score: 20,
+        resources: { power: 81, water: 74, food: 88, oxygen: 92, shielding: 67 },
+        objectives: { total: 3, done: 2 },
+        missionStatus: "active",
+      },
+    });
+    assert.equal(currentState.statusCode, 200);
+    assert.equal(currentState.body.source, "dashboard-live");
+    assert.match(currentState.body.reply, /Moon Outpost/i);
+    assert.match(currentState.body.reply, /day 2 of 20/i);
+    assert.match(currentState.body.reply, /score 20/i);
+    assert.match(currentState.body.reply, /power 81/i);
+    assert.match(currentState.body.reply, /oxygen 92/i);
+    assert.match(currentState.body.reply, /Objectives: 2\/3/i);
+
+    for (const message of [
+      "what's my current state?",
+      "what's mu current state?",
+      "what is my current status?",
+      "show my mission status",
+    ]) {
+      const summary = await request({
+        message,
+        state: {
+          mission: "moon",
+          campaignDays: 20,
+          day: 2,
+          score: 20,
+          resources: { power: 81, water: 74, food: 88, oxygen: 92, shielding: 67 },
+          objectives: { total: 3, done: 2 },
+          missionStatus: "active",
+        },
+      });
+      assert.equal(summary.body.source, "dashboard-live", message);
+      assert.match(summary.body.reply, /Moon Outpost|mission status/i, message);
+    }
+
+    const power = await request({
+      message: "How much power do I have?",
+      state: { mission: "moon", resources: { power: 81 } },
+    });
+    assert.equal(power.body.source, "dashboard-live");
+    assert.match(power.body.reply, /Power is at 81%/i);
+
+    const event = await request({
+      message: "What event am I facing today?",
+      state: {
+        mission: "mars",
+        day: 4,
+        currentEvent: {
+          title: "Dust storm",
+          description: "Dust is reducing visibility.",
+          choices: [{ label: "Shelter", effects: { power: -2 }, score: 4 }],
+        },
+      },
+    });
+    assert.equal(event.body.source, "dashboard-live");
+    assert.match(event.body.reply, /Dust storm/i);
+
+    const choices = await request({
+      message: "What choices do I have?",
+      state: {
+        mission: "mars",
+        currentEvent: {
+          title: "Dust storm",
+          choices: [{ label: "Shelter", effects: { power: -2 }, score: 4 }],
+        },
+      },
+    });
+    assert.equal(choices.body.source, "dashboard-live");
+    assert.match(choices.body.reply, /Shelter/i);
+
+    const objectives = await request({
+      message: "What are my remaining objectives?",
+      state: { mission: "mars", objectives: { total: 5, done: 2 } },
+    });
+    assert.equal(objectives.body.source, "dashboard-live");
+    assert.match(objectives.body.reply, /completed 2 of 5/i);
+
+    const completion = await request({
+      message: "How do I complete my current mission?",
+      state: {
+        mission: "Mars",
+        campaignDays: 30,
+        objectives: { total: 5, done: 2 },
+        resources: { power: 80, water: 70, food: 75, oxygen: 90, shielding: 85 },
+      },
+    });
+    assert.equal(completion.body.source, "dashboard-live");
+    assert.match(completion.body.reply, /Mars Outpost \(30 mission days\)/i);
+    assert.match(completion.body.reply, /completed 2 of 5/i);
+    assert.match(completion.body.reply, /3 remaining/i);
+    assert.match(completion.body.reply, /positive score/i);
+
+    const currentTask = await request({
+      message: "day 5 e amr ki kaj?",
+      state: {
+        mission: "Moon",
+        day: 5,
+        campaignDays: 20,
+        currentEvent: {
+          id: "moon-05",
+          day: 5,
+          title: "Solar Array Dust Buildup",
+          description: "Dust is reducing solar power.",
+          choices: [],
+          task: { title: "Service the solar array", steps: [{ action: "Clean the panels" }] },
+        },
+        taskProgress: { eventId: "moon-05", stepIndex: 0 },
+      },
+    });
+    assert.equal(currentTask.body.source, "dashboard-live");
+    assert.match(currentTask.body.reply, /Service the solar array/i);
+
+    const unavailableDay = await request({
+      message: "What is the task in day 10?",
+      state: {
+        mission: "moon",
+        day: 2,
+        currentEvent: { title: "Current event", choices: [] },
+      },
+    });
+    assert.equal(unavailableDay.body.source, "dashboard-missing");
+    assert.match(unavailableDay.body.reply, /day 10/i);
+
+    for (const message of [
+      "What will I need to do on the tenth day?",
+      "What event happens on day 10?",
+      "Tell me about day 10.",
+    ]) {
+      const currentDayTask = await request({
+        message,
+        state: {
+          mission: "moon",
+          day: 10,
+          currentEvent: {
+            title: "Habitat Seal Inspection",
+            description: "A pressure sensor indicates a possible habitat seal problem.",
+            choices: [{ label: "Inspect the seal", effects: { power: -1 }, score: 15 }],
+            task: {
+              title: "Inspect the habitat seal",
+              steps: [{ action: "Check the pressure readings" }],
+            },
+          },
+        },
+      });
+      assert.equal(currentDayTask.body.source, "dashboard-live", message);
+      assert.match(currentDayTask.body.reply, /Habitat Seal Inspection/i, message);
+      assert.match(currentDayTask.body.reply, /Inspect the habitat seal/i, message);
+    }
+
+    const incompleteState = await request({
+      message: "What is my current state?",
+      state: { mission: "moon", day: 2 },
+    });
+    assert.equal(incompleteState.body.source, "dashboard-missing");
+    assert.match(incompleteState.body.reply, /resource|dashboard/i);
+
+    const marsSuccess = await request({
+      message: "How can I complete the Mars mission successfully?",
+      state: { mission: "mars", missionStatus: "active" },
+    });
+    assert.equal(marsSuccess.body.source, "dashboard-live");
+    assert.match(marsSuccess.body.reply, /survive 30|positive score|objectives/i);
+
     const frontendPayloadShape = await request({
       message: "[Current mission: Moon] What happens on the 3rd day?",
       state: {
@@ -143,14 +314,6 @@ async function run() {
     assert.equal(frontendPayloadShape.statusCode, 200);
     assert.equal(frontendPayloadShape.body.source, "mission-rules");
     assert.match(frontendPayloadShape.body.reply, /Day 3 tasks: "Service the solar array"/);
-
-    const messageOnly = await request({
-      message: "What happens on the 3rd day?",
-    });
-    assert.equal(messageOnly.statusCode, 200);
-    assert.equal(messageOnly.body.source, "mission-rules");
-    assert.match(messageOnly.body.reply, /Day 3 is part of/);
-    assert.match(messageOnly.body.reply, /exact live task/i);
 
     const banglaFrontendPayloadShape = await request({
       message: "[Current mission: Moon] তৃতীয় দিনে কি হবে",
@@ -258,6 +421,26 @@ async function run() {
     assert.equal(certificate.statusCode, 200);
     assert.equal(certificate.body.source, "dashboard-live");
     assert.match(certificate.body.reply, /only after a successful mission/i);
+    assert.match(certificate.body.reply, /30-day Mars campaign/i);
+    assert.doesNotMatch(certificate.body.reply, /20-day Moon campaign/i);
+    assert.match(certificate.body.reply, /critical resource above zero/i);
+    assert.match(certificate.body.reply, /all required objectives/i);
+    assert.match(certificate.body.reply, /positive score/i);
+
+    const moonRequirements = await request({
+      message: "What do I need to get a certificate?",
+      state: { mission: "Moon", campaignDays: 20 },
+    });
+    assert.equal(moonRequirements.body.source, "dashboard-live");
+    assert.match(moonRequirements.body.reply, /20-day Moon campaign/i);
+    assert.doesNotMatch(moonRequirements.body.reply, /30-day Mars campaign/i);
+
+    const personalUnknown = await request({
+      message: "Am I eligible for a certificate now?",
+      state: { mission: "Mars", campaignDays: 30 },
+    });
+    assert.equal(personalUnknown.body.source, "dashboard-live");
+    assert.match(personalUnknown.body.reply, /live mission status is unavailable/i);
 
     console.log("8 server routing tests passed");
   } finally {

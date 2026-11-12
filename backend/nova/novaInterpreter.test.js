@@ -139,6 +139,22 @@ test("duration answer", () => {
   const r = handleNovaQuestion("30 days survive korte hobe?", mars);
   assert.ok(r.answer.includes("30 diner"));
 });
+test("current event task is retained beside state tasks", () => {
+  const ctx = contextFromClientState({
+    mission: "mars",
+    day: 3,
+    tasks: [{ id: "general", day: 3, title: "Check supplies" }],
+    currentEvent: {
+      id: "mars-03",
+      day: 3,
+      task: { title: "Repair the antenna", steps: [{ action: "Inspect the cable" }] },
+    },
+  });
+  assert.deepEqual(
+    ctx.tasks.map((task) => task.title),
+    ["Check supplies", "Repair the antenna"]
+  );
+});
 console.log("\nCampaign detection");
 for (const [question, expected, language] of [
   ["How many days is the Moon campaign?", "moon", "en"],
@@ -214,10 +230,10 @@ test("real-world travel time is not the campaign length", () => {
     assert.equal(handleNovaQuestion(q, mars).answer, null, q);
   }
 });
-test("day question without task data gives an honest rules answer", () => {
+test("day question without task data goes to the model", () => {
   const r = handleNovaQuestion("what happens on day 5?", { mission: "mars", day: 3 });
-  assert.match(r.answer, /Day 5 is part of Mars Outpost/);
-  assert.match(r.answer, /exact live task/i);
+  assert.equal(r.answer, null);
+  assert.ok(r.prompt.user.includes("Mission Day 5"));
 });
 test("contextFromClientState cleans untrusted input", () => {
   const ctx = contextFromClientState({
