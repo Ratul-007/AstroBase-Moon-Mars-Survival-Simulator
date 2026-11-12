@@ -83,6 +83,16 @@ check('score', r && /453/.test(r.reply), r && r.reply);
 r = ask('How many objectives have I completed?', MID);
 check('objectives', r && /1 of 3/.test(r.reply), r && r.reply);
 
+r = ask('How do I complete my current mission?', MID);
+check('live completion guidance', r && /Moon Outpost \(20 mission days\)/.test(r.reply) && /completed 1 of 3/.test(r.reply) && /2 remaining/.test(r.reply) && /positive score/.test(r.reply), r && r.reply);
+r = ask('amr mission complete korte ki korte hobe?', { ...MID, mission: 'mars', campaignDays: 30 });
+check('Banglish live completion guidance', r && /30 mission days/.test(r.reply) && /completed 1 of 3/.test(r.reply), r && r.reply);
+
+r = ask('day 5 e amr ki kaj?', MID);
+check('Banglish current day task', r && r.source === 'dashboard-live' && /Service the solar array/.test(r.reply), r && r.reply);
+r = ask('day 10 er task ki?', MID);
+check('future day task unavailable', r && r.source === 'dashboard-missing' && /day 10/i.test(r.reply), r && r.reply);
+
 r = ask('How many events have I resolved?', FULL);
 check('events resolved', r && /20 of 20/.test(r.reply), r && r.reply);
 
@@ -146,9 +156,13 @@ check('single snapshot is not a trend', r && r.source === 'dashboard-missing' &&
 
 /* ---- certificate policy is not invented ---- */
 r = ask('Mission fail hole ki certificate pabo?', { ...MID, missionStatus: 'failed' });
-check('failed certificate policy', r && /only after a successful mission/i.test(r.reply) && /status is failed/i.test(r.reply), r && r.reply);
-r = ask('Can I get a certificate?', { ...MID, missionStatus: undefined });
-check('unknown certificate status', r && /cannot determine certificate eligibility/i.test(r.reply), r && r.reply);
+check('failed certificate policy', r && /only after a successful mission/i.test(r.reply) && /status is failed.*certificate/i.test(r.reply), r && r.reply);
+r = ask('What do I need to get a certificate?', { ...MID, missionStatus: undefined });
+check('moon certificate requirements', r && /20-day Moon campaign/i.test(r.reply) && !/30-day Mars/i.test(r.reply) && /positive score/i.test(r.reply), r && r.reply);
+r = ask('What do I need to get a certificate?', { ...MID, mission: 'mars', campaignDays: 30, missionStatus: undefined });
+check('mars certificate requirements', r && /30-day Mars campaign/i.test(r.reply) && !/20-day Moon/i.test(r.reply) && /positive score/i.test(r.reply), r && r.reply);
+r = ask('Am I eligible for a certificate now?', { ...MID, missionStatus: undefined });
+check('personal certificate status unavailable', r && /eligibility.*unavailable|live mission status is unavailable/i.test(r.reply), r && r.reply);
 
 /* ---- current event, choices and field task (exact data from the game) ---- */
 r = ask('What is my current event?', MID);

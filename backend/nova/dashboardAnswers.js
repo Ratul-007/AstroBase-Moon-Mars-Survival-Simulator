@@ -56,6 +56,9 @@ function norm(value) {
     .toLowerCase()
     .replace(/^\[current mission:[^\]]*\]\s*/i, '')
     .replace(/[^\p{L}\p{M}\p{N}]+/gu, ' ') // \p{M} keeps Bangla vowel signs and hasanta
+    .replace(/\bwhat s\b/g, 'what is')
+    .replace(/\bwhats\b/g, 'what is')
+    .replace(/\bmu\b/g, 'my')
     .trim()
     .replace(/\s+/g, ' ');
 }
@@ -91,6 +94,14 @@ const DAY_Q = [
   'which day', 'what day', 'current day', 'mission day', 'day am i', 'day number', 'day koto', 'din koto',
   'kon din', 'kon dine', 'কোন দিন', 'কোন দিনে', 'কততম দিন', 'কত তম দিন', 'দিন কত'
 ];
+const DAY_SPECIFIC = ['task', 'tasks', 'kaj', 'kajer', 'কাজ', 'কাজের', 'event', 'events'];
+const ORDINAL_DAYS = {
+  first: 1, second: 2, third: 3, fourth: 4, fifth: 5,
+  sixth: 6, seventh: 7, eighth: 8, ninth: 9, tenth: 10,
+  eleventh: 11, twelfth: 12, thirteenth: 13, fourteenth: 14,
+  fifteenth: 15, sixteenth: 16, seventeenth: 17, eighteenth: 18,
+  nineteenth: 19, twentieth: 20,
+};
 const REMAIN_DAYS = [
   'days left', 'days are left', 'days remaining', 'days remain', 'remaining days', 'days to go',
   'din baki', 'baki din', 'দিন বাকি', 'বাকি দিন'
@@ -105,10 +116,17 @@ const TREND_WORDS = ['trend', 'trending', 'history', 'historical', 'increasing',
 const RISK_WORDS = ['risk', 'risky', 'at risk', 'danger', 'threat', 'ঝুঁকি', 'বিপদ'];
 const CHOICE_ADVICE_WORDS = ['which choice', 'what choice', 'which option', 'what option', 'should i take', 'should i choose', 'best choice', 'best option', 'কোনটা নেব', 'কোন বিকল্প', 'কোন অপশন'];
 const CERTIFICATE_WORDS = ['certificate', 'সার্টিফিকেট', 'সনদ'];
+const CERTIFICATE_PERSONAL = ['eligible', 'eligibility', 'my', 'am i', 'right now', 'currently', 'failed', 'fail'];
 const SCORE = ['score', 'points', 'স্কোর'];
 const SCORE_RULES = ['win', 'won', 'succeed', 'success', 'fail', 'negative', 'zero', 'positive', 'need', 'needed', 'minimum'];
 const OBJ = ['objective', 'objectives', 'অবজেক্টিভ', 'লক্ষ্য'];
-const SUMMARY = ['status', 'dashboard', 'levels', 'overview', 'রিসোর্স', 'স্ট্যাটাস', 'ড্যাশবোর্ড'];
+const COMPLETION = [
+  'complete my current mission', 'complete the mission', 'finish the mission',
+  'mission complete', 'mission successfully', 'what do i need to finish',
+  'objectives do i need', 'mission complete korte', 'mission shesh korte',
+  'mission শেষ করতে', 'মিশন সম্পূর্ণ করতে'
+];
+const SUMMARY = ['status', 'state', 'dashboard', 'levels', 'overview', 'রিসোর্স', 'স্ট্যাটাস', 'ড্যাশবোর্ড'];
 const RESOURCE_WORD = ['resource', 'resources', 'রিসোর্স'];
 const BANGLISH = ['amar', 'amader', 'ami', 'koto', 'kon', 'din', 'dine', 'ekhon', 'baki', 'sobcheye', 'shobcheye', 'achi', 'ache', 'dekhao', 'bolo', 'koyta'];
 
@@ -274,10 +292,35 @@ function detectIntent(q) {
   const suit = has(q, SUIT);
   const resourceWord = has(q, RESOURCE_WORD);
   const hypothetical = has(q, ADVICE) || has(q, ['what happens', 'what if', 'if']);
+  const requestedDay = requestedDayNumber(q);
 
-  if (has(q, CERTIFICATE_WORDS)) return { type: 'certificate' };
+  if (has(q, CERTIFICATE_WORDS)) {
+    return { type: 'certificate', personal: has(q, CERTIFICATE_PERSONAL) };
+  }
+  const dayEventQuestion = has(q, DAY_SPECIFIC)
+    || has(q, ['tell me about', 'need to do', 'কি করতে হবে']);
+  const explicitEventQuestion = has(q, DAY_SPECIFIC) && !has(q, ['if', 'skip', 'jodi', 'korle', 'hole', 'কি হবে']);
+  const taskRequirementQuestion = has(q, ['need to do', 'কি করতে হবে']);
+  if (requestedDay !== undefined && dayEventQuestion && (!hypothetical || explicitEventQuestion || taskRequirementQuestion)) {
+    return { type: 'dayEvent', day: requestedDay };
+  }
+  if (has(q, COMPLETION) || (has(q, ['mission']) && has(q, ['complete', 'finish', 'successfully', 'করতে'])) ||
+      (has(q, OBJ) && has(q, ['need', 'remaining', 'complete', 'কি', 'কী']))) {
+    return { type: 'completion' };
+  }
   if (has(q, CHOICE_ADVICE_WORDS) && (has(q, EVENT_WORDS) || has(q, ['choice', 'option', 'বিকল্প', 'অপশন']))) {
     return { type: 'choiceAdvice' };
+  }
+
+  function requestedDayNumber(q) {
+    const numeric = q.match(/\b(?:day|দিন)\s+(\d+)\b/) || q.match(/\b(\d+)(?:st|nd|rd|th)\s+(?:day|দিন)\b/);
+    if (numeric) return Number(numeric[1]);
+
+    for (const [word, day] of Object.entries(ORDINAL_DAYS)) {
+      if (new RegExp(`\\b${word}\\s+(?:day|দিন)\\b`).test(q)) return day;
+    }
+
+    return undefined;
   }
   if (hypothetical && has(q, ZERO_WORDS) && keys.length && !suit) {
     return { type: 'zero', keys };
@@ -317,6 +360,21 @@ function detectLang(rawQuestion, q) {
 
 const f = n => String(Math.round(n * 10) / 10);
 const MISSION_NAME = { moon: 'Moon Outpost', mars: 'Mars Outpost' };
+function certificateRequirements(mission, campaignDays, lang = 'en') {
+  const days = Number.isFinite(campaignDays) && campaignDays > 0
+    ? campaignDays
+    : DEFAULT_DAYS[mission];
+  const campaign = mission === 'mars'
+    ? lang === 'bn' ? `Mars-এর ${days} দিনের পুরো campaign সম্পূর্ণ করা` : lang === 'bl' ? `Mars-er puro ${days}-day campaign complete kora` : `complete the full ${days}-day Mars campaign`
+    : mission === 'moon'
+      ? lang === 'bn' ? `Moon-এর ${days} দিনের পুরো campaign সম্পূর্ণ করা` : lang === 'bl' ? `Moon-er puro ${days}-day campaign complete kora` : `complete the full ${days}-day Moon campaign`
+      : lang === 'bn' ? 'পুরো mission campaign সম্পূর্ণ করা' : lang === 'bl' ? 'puro mission campaign complete kora' : 'complete the full mission campaign';
+  return lang === 'bn'
+    ? `শর্ত হলো ${campaign}, সব critical resource শূন্যের ওপরে রাখা, সব required objective সম্পূর্ণ করা এবং positive score রাখা।`
+    : lang === 'bl'
+      ? `Requirement holo ${campaign}, shob critical resource zero-r opore rakha, shob required objective complete kora ebong positive score rakha.`
+      : `The requirement is to ${campaign}, keep every critical resource above zero, complete all required objectives, and finish with a positive score.`;
+}
 
 const NAME = {
   day: { en: 'mission day', bl: 'mission day', bn: 'মিশনের দিন' },
@@ -367,6 +425,13 @@ const S = {
     summaryRes: all => `Resources: ${all}.`,
     summaryObj: (done, total) => `Objectives: ${done}/${total}.`,
     summaryStatus: st => `Mission status: ${st}.`,
+    completion: (mission, days, done, total, remaining) => {
+      const campaign = mission ? `${MISSION_NAME[mission]} (${days} mission days)` : `the ${days || 'full'}-day campaign`;
+      const progress = total !== undefined
+        ? ` You have completed ${done} of ${total} required objectives${remaining ? `, with ${remaining} remaining` : ''}.`
+        : '';
+      return `To complete ${campaign}, resolve the full campaign, keep every critical resource above zero, complete all required objectives, and finish with a positive score.${progress}`;
+    },
     eventHead: (day, title, sev, desc) => `Current event${day !== undefined ? ` (day ${day})` : ''}: "${title}"${sev ? ` [${sev}]` : ''}. ${desc}`.trim(),
     choicesHead: 'Your choices:',
     choicesNote: "Effects shown are each choice's own; the daily survival cost is applied separately.",
@@ -381,11 +446,13 @@ const S = {
     trend: (label, first, last, delta, firstDay, lastDay) => `${label} changed from ${f(first)}% to ${f(last)}%${firstDay !== undefined && lastDay !== undefined ? ` (day ${firstDay} to day ${lastDay})` : ''}: ${delta > 0 ? 'up' : delta < 0 ? 'down' : 'unchanged'} by ${f(Math.abs(delta))} percentage points. This describes the supplied history; it does not predict depletion.`,
     risk: (lowest, all) => `The lowest current value is ${lowest}; that is a snapshot, not a proven risk ranking. Actual risk also depends on the current event, choice effects and any supplied history. All live levels: ${all}.`,
     suitZero: 'The survival rules state that leaving the safe zone has a 2-second grace period. After that, suit oxygen drains at 4 percentage points per second while outside. When suit oxygen reaches 0%, health drains at 6 points per second, and the survival run fails when health reaches 0. Returning inside the zone refills suit oxygen at 8 points per second and can regenerate health while oxygen is above 50%. This is separate from mission oxygen.',
-    certificate: status => status === 'success'
-      ? 'The game UI specifies that a certificate is available only after a successful mission. Your current mission status is successful, so the certificate flow should be available.'
+    certificate: (status, mission, days, personal) => status === 'success'
+      ? 'A certificate is available only after a successful mission. ' + certificateRequirements(mission, days) + ' Your live mission status is successful, so the certificate flow should be available.'
       : status === 'failed'
-        ? 'The game UI specifies that a certificate is available only after a successful mission. Your current mission status is failed, so the available rules do not specify certificate eligibility for this run.'
-        : 'The available game UI specifies that a certificate is available only after a successful mission. I cannot determine certificate eligibility until the current mission status is available.'
+        ? 'A certificate is available only after a successful mission. ' + certificateRequirements(mission, days) + ' Your live mission status is failed, so no success certificate is awarded.'
+        : personal
+          ? 'I cannot determine your certificate eligibility because the live mission status is unavailable. ' + certificateRequirements(mission, days)
+          : 'A certificate is available only after a successful mission. ' + certificateRequirements(mission, days) + ' A failed mission is not eligible for a success certificate.'
   },
   bl: {
     missing: what => `Ami ekhon apnar ${what} dekhte pachchhi na. Game theke ei data amar kache pouchayni, tai dashboard ta ekbar dekhun.`,
@@ -423,11 +490,13 @@ const S = {
     trend: (label, first, last, delta, firstDay, lastDay) => `${label} ${f(first)}% theke ${f(last)}%-e gechhe${firstDay !== undefined && lastDay !== undefined ? ` (day ${firstDay} theke day ${lastDay})` : ''}: ${delta > 0 ? 'berechhe' : delta < 0 ? 'komechhe' : 'oporibortito'}, ${f(Math.abs(delta))} percentage point. Eta sudhu deya history-r bornona; depletion predict kore na.`,
     risk: (lowest, all) => `Shobcheye kom current value holo ${lowest}; eta sudhu snapshot, nishchit risk ranking noy. Actual risk current event, choice effects ebong deya history-r upor-o nirvor kore. Shob live level: ${all}.`,
     suitZero: 'Survival rules onujayi safe zone-er baire 2-second grace period ache. Tarpor baire thakle suit oxygen proti second-e 4 point kore kome. Suit oxygen 0%-e gele health proti second-e 6 point kore kome, health 0 hole survival run fail hoy. Zone-er bhitore phire ele suit oxygen proti second-e 8 point kore refill hoy ebong oxygen 50%-er beshi thakle health regenerate korte pare. Eta mission oxygen theke alada.',
-    certificate: status => status === 'success'
+    certificate: (status, mission, days, personal) => status === 'success'
       ? 'Game UI-te bola ache certificate sudhu successful mission-er pore available. Apnar current mission successful, tai certificate flow available howar kotha.'
       : status === 'failed'
         ? 'Game UI-te bola ache certificate sudhu successful mission-er pore available. Apnar current mission failed, tai ei run-er certificate eligibility available rules-e nei.'
-        : 'Available game UI-te certificate sudhu successful mission-er pore available bola ache. Current mission status na pele eligibility nirdharon kora jabe na.'
+        : personal
+            ? 'Ami apnar certificate eligibility nirdharon korte parchi na, karon live mission status nei. ' + certificateRequirements(mission, days, 'bl')
+            : 'Certificate sudhu successful mission-er pore available. ' + certificateRequirements(mission, days, 'bl') + ' Failed mission success certificate pay na.'
   },
   bn: {
     missing: what => `আমি এখন আপনার ${what} দেখতে পাচ্ছি না। গেম থেকে এই তথ্য আমার কাছে পৌঁছায়নি, তাই অনুগ্রহ করে ড্যাশবোর্ড দেখুন।`,
@@ -465,11 +534,13 @@ const S = {
     trend: (label, first, last, delta, firstDay, lastDay) => `${label} ${f(first)}% থেকে ${f(last)}%-এ পরিবর্তিত হয়েছে${firstDay !== undefined && lastDay !== undefined ? ` (দিন ${firstDay} থেকে দিন ${lastDay})` : ''}: ${delta > 0 ? 'বেড়েছে' : delta < 0 ? 'কমেছে' : 'অপরিবর্তিত'}, ${f(Math.abs(delta))} percentage point। এটি শুধু দেওয়া history-এর বর্ণনা; depletion-এর পূর্বাভাস নয়।`,
     risk: (lowest, all) => `সবচেয়ে কম বর্তমান মান হলো ${lowest}; এটি শুধু একটি snapshot, নিশ্চিত risk ranking নয়। প্রকৃত ঝুঁকি current event, choice effects এবং দেওয়া history-এর ওপরও নির্ভর করে। সব live level: ${all}।`,
     suitZero: 'Survival rules অনুযায়ী safe zone-এর বাইরে ২ সেকেন্ডের grace period আছে। এরপর বাইরে থাকলে suit oxygen প্রতি সেকেন্ডে ৪ point করে কমে। Suit oxygen ০%-এ গেলে health প্রতি সেকেন্ডে ৬ point করে কমে এবং health ০ হলে survival run ব্যর্থ হয়। Zone-এর ভেতরে ফিরলে suit oxygen প্রতি সেকেন্ডে ৮ point করে refill হয় এবং oxygen ৫০%-এর বেশি থাকলে health regenerate হতে পারে। এটি mission oxygen থেকে আলাদা।',
-    certificate: status => status === 'success'
+    certificate: (status, mission, days, personal) => status === 'success'
       ? 'Game UI-তে বলা আছে certificate শুধু successful mission-এর পরে available। আপনার বর্তমান mission successful, তাই certificate flow available হওয়ার কথা।'
       : status === 'failed'
         ? 'Game UI-তে বলা আছে certificate শুধু successful mission-এর পরে available। আপনার বর্তমান mission failed, তাই এই run-এর certificate eligibility available rules-এ নির্দিষ্ট নয়।'
-        : 'Available game UI-তে certificate শুধু successful mission-এর পরে available বলা আছে। Current mission status না পেলে eligibility নির্ধারণ করা যাবে না।'
+        : personal
+            ? 'Live mission status na thakay apnar certificate eligibility nirdharon kora jacche na. ' + certificateRequirements(mission, days, 'bn')
+            : 'Certificate shudhu successful mission-er pore pawa jay. ' + certificateRequirements(mission, days, 'bn') + ' Failed mission success certificate-er jonno eligible noy.'
   }
 };
 
@@ -569,7 +640,7 @@ function answerFromDashboard(rawQuestion, rawState, missionHint) {
 
   switch (intent.type) {
     case 'certificate':
-      return live(s.certificate(d.missionStatus));
+      return live(s.certificate(d.missionStatus, d.mission, d.campaignDays, intent.personal));
     case 'suitZero':
       return live(s.suitZero);
     case 'zero': {
@@ -664,6 +735,24 @@ function answerFromDashboard(rawQuestion, rawState, missionHint) {
       }
       return live(lines.join('\n'));
     }
+    case 'dayEvent': {
+      if (!d.event || d.day !== intent.day) {
+        return missing(`the event or task for day ${intent.day}`);
+      }
+      const ev = d.event;
+      const lines = [s.eventHead(d.day, ev.title, ev.severity && SEVERITY[lang][ev.severity], ev.description)];
+      if (ev.choices.length) {
+        lines.push(s.choicesHead);
+        ev.choices.forEach((c, i) => {
+          const eff = effectsText(c.effects, c.score, lang);
+          lines.push(`${i + 1}) ${c.label}${eff ? ` (${eff})` : ''}`);
+        });
+      }
+      if (ev.task) {
+        lines.push(s.task(ev.task.title, Math.min(d.stepIndex, ev.task.steps.length - 1) + 1, ev.task.steps.length, ev.task.steps[Math.min(d.stepIndex, ev.task.steps.length - 1)]));
+      }
+      return live(lines.join('\n'));
+    }
     case 'task': {
       if (!d.event) {
         if (ended) return live(s.noEvent(s.ended[d.missionStatus]));
@@ -679,15 +768,27 @@ function answerFromDashboard(rawQuestion, rawState, missionHint) {
     }
     case 'summary': {
       const parts = [];
+      const levels = levelsText(d, lang);
+      if (!levels && !d.objectives) {
+        return missing(NAME.summary[lang]);
+      }
       if (d.mission || d.day !== undefined || d.score !== undefined) {
         parts.push(s.summaryMission(d.day, d.campaignDays, d.mission, d.score));
       }
-      const levels = levelsText(d, lang);
       if (levels) parts.push(s.summaryRes(levels));
       if (d.objectives) parts.push(s.summaryObj(d.objectives.done, d.objectives.total));
       if (d.missionStatus) parts.push(s.summaryStatus(s.status[d.missionStatus]));
       if (!parts.length) return missing(NAME.summary[lang]);
       return live(parts.join(' '));
+    }
+    case 'completion': {
+      const days = d.campaignDays;
+      if (!d.mission && !days) return missing('the active mission and campaign duration');
+      const total = d.objectives?.total;
+      const done = d.objectives?.done;
+      const remaining = total !== undefined && done !== undefined ? total - done : undefined;
+      const completion = s.completion || S.en.completion;
+      return live(completion(d.mission, days, done, total, remaining));
     }
     default:
       return null;
