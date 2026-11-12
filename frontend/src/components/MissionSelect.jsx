@@ -18,8 +18,7 @@ const missions = [
     button: "DEPLOY TO MOON",
     route: "/mission/moon",
     planet: "MOON",
-    image:
-      "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1800&q=85",
+    image: "/images/moon.webp",
   },
   {
     id: "mars",
@@ -37,8 +36,7 @@ const missions = [
     button: "DEPLOY TO MARS",
     route: "/mission/mars",
     planet: "MARS",
-    image:
-      "https://images.unsplash.com/photo-1614728263952-84ea256f9679?auto=format&fit=crop&w=1800&q=85",
+    image: "/images/mars.jpg",
   },
 ];
 

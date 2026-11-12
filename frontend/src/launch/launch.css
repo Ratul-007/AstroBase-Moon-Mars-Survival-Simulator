@@ -1,0 +1,211 @@
+/* Launch Lite overlay. The 3D canvas fills the screen, this sits on top. */
+
+#root > .launch-root.launch-root {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+}
+
+.launch-root {
+  --launch-accent: #7dd3fc;
+
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  overflow: hidden;
+  background: #02030a;
+  color: #eef4ff;
+  font-family: var(--font-body);
+}
+
+.launch-root *,
+.launch-root *::before,
+.launch-root *::after {
+  box-sizing: border-box;
+}
+
+.launch-fade {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: #000;
+  opacity: 1;
+  pointer-events: none;
+}
+
+.launch-top {
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px clamp(16px, 4vw, 40px);
+  background: linear-gradient(180deg, rgba(2, 3, 10, 0.7), transparent);
+}
+
+.launch-eyebrow {
+  margin: 0 0 6px;
+  color: var(--launch-accent);
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+}
+
+.launch-destination {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(20px, 3vw, 30px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.launch-skip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  border: 1px solid rgba(238, 244, 255, 0.4);
+  border-radius: 8px;
+  background: rgba(5, 12, 25, 0.6);
+  color: #eef4ff;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.launch-skip:hover {
+  border-color: var(--launch-accent);
+  background: rgba(125, 211, 252, 0.12);
+}
+
+.launch-skip:focus-visible {
+  outline: 2px solid var(--launch-accent);
+  outline-offset: 3px;
+}
+
+.launch-key {
+  padding: 2px 6px;
+  border: 1px solid rgba(238, 244, 255, 0.35);
+  border-radius: 4px;
+  color: #b4c3d6;
+  font-family: var(--font-display);
+  font-size: 10px;
+}
+
+.launch-center {
+  position: absolute;
+  z-index: 8;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.launch-big {
+  font-family: var(--font-display);
+  font-size: clamp(54px, 12vw, 140px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  text-shadow: 0 6px 40px rgba(0, 0, 0, 0.6);
+  animation: launch-pop 0.9s ease-out both;
+}
+
+@keyframes launch-pop {
+  0% {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
+.launch-bottom {
+  position: absolute;
+  z-index: 10;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 40px clamp(16px, 4vw, 40px) 22px;
+  background: linear-gradient(0deg, rgba(2, 3, 10, 0.8), transparent);
+}
+
+.launch-phase {
+  margin: 0 0 8px;
+  color: var(--launch-accent);
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+}
+
+.launch-caption {
+  max-width: 640px;
+  min-height: 3.2em;
+  margin: 0 0 16px;
+  color: #dbe6f5;
+  font-size: clamp(14px, 1.6vw, 17px);
+  line-height: 1.6;
+  animation: launch-caption-in 0.6s ease-out both;
+}
+
+@keyframes launch-caption-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.launch-bar {
+  height: 3px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: rgba(238, 244, 255, 0.18);
+}
+
+.launch-bar span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--launch-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+@media (max-width: 560px) {
+  .launch-top {
+    padding-top: 14px;
+  }
+
+  .launch-key {
+    display: none;
+  }
+
+  .launch-caption {
+    min-height: 4.8em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .launch-big,
+  .launch-caption {
+    animation: none;
+  }
+}

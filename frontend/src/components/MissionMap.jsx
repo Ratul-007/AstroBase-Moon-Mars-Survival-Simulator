@@ -28,6 +28,15 @@ function MissionMap({
   const canvasRef = useRef(null);
   const lastPosRef = useRef({ x: 0, z: 3 });
   const headingRef = useRef(Math.PI / 2);
+  const lastCaptionRef = useRef(null);
+  const lastDrawRef = useRef({
+    x: null,
+    z: null,
+    radius: null,
+    inZone: null,
+    size: null,
+    dpr: null,
+  });
 
   const [size, setSize] = useState(getInitialSize);
   const [caption, setCaption] = useState(null);
@@ -51,10 +60,47 @@ function MissionMap({
       const canvas = canvasRef.current;
 
       if (canvas) {
+        const dpr = window.devicePixelRatio || 1;
+        const player = playerPosRef?.current ?? { x: 0, z: 0 };
+        const zone = survivalRef?.current;
+        const radius =
+          Number.isFinite(zone?.radius) && zone.radius > 0
+            ? zone.radius
+            : safeZone.radius;
+        const center = safeZone.center ?? { x: 0, z: 0 };
+        const inZone =
+          typeof zone?.inZone === "boolean"
+            ? zone.inZone
+            : Math.hypot(
+                player.x - center.x,
+                player.z - center.z
+              ) <= radius;
+        const lastDraw = lastDrawRef.current;
+        const hasTask = Boolean(step?.position);
+        const positionChanged =
+          lastDraw.x === null ||
+          Math.hypot(player.x - lastDraw.x, player.z - lastDraw.z) > 0.01;
+        const zoneChanged =
+          lastDraw.radius !== radius ||
+          lastDraw.inZone !== inZone ||
+          lastDraw.size !== size ||
+          lastDraw.dpr !== dpr;
+
+        if (!hasTask && !positionChanged && !zoneChanged) {
+          frame = requestAnimationFrame(draw);
+          return;
+        }
+
+        lastDraw.x = player.x;
+        lastDraw.z = player.z;
+        lastDraw.radius = radius;
+        lastDraw.inZone = inZone;
+        lastDraw.size = size;
+        lastDraw.dpr = dpr;
+
         const ctx = canvas.getContext("2d");
 
         if (ctx) {
-          const dpr = window.devicePixelRatio || 1;
           const pixels = Math.round(size * dpr);
 
           if (canvas.width !== pixels || canvas.height !== pixels) {
@@ -67,24 +113,6 @@ function MissionMap({
 
           const c = size / 2;
           const scale = (c - 5) / MAP_RANGE;
-
-          const player = playerPosRef?.current ?? { x: 0, z: 0 };
-          const zone = survivalRef?.current;
-
-          const radius =
-            Number.isFinite(zone?.radius) && zone.radius > 0
-              ? zone.radius
-              : safeZone.radius;
-
-          const center = safeZone.center ?? { x: 0, z: 0 };
-
-          const inZone =
-            typeof zone?.inZone === "boolean"
-              ? zone.inZone
-              : Math.hypot(
-                  player.x - center.x,
-                  player.z - center.z
-                ) <= radius;
 
           const last = lastPosRef.current;
           const mx = player.x - last.x;
@@ -267,7 +295,7 @@ function MissionMap({
 
           // North marker.
           ctx.fillStyle = "rgba(226,232,240,0.85)";
-          ctx.font = "bold 10px Arial, sans-serif";
+          ctx.font = "bold 10px var(--font-body)";
           ctx.textAlign = "center";
           ctx.fillText("N", c, 12);
 
@@ -303,6 +331,7 @@ function MissionMap({
   // Station name, distance and current zone.
   useEffect(() => {
     if (!step?.position) {
+      lastCaptionRef.current = null;
       setCaption(null);
       return undefined;
     }
@@ -328,7 +357,7 @@ function MissionMap({
               player.z - center.z
             ) <= radius;
 
-      setCaption({
+      const nextCaption = {
         label: step.label,
         distance: Math.round(
           Math.hypot(
@@ -337,7 +366,20 @@ function MissionMap({
           )
         ),
         red: !inZone,
-      });
+      };
+      const previousCaption = lastCaptionRef.current;
+
+      if (
+        previousCaption &&
+        previousCaption.label === nextCaption.label &&
+        previousCaption.distance === nextCaption.distance &&
+        previousCaption.red === nextCaption.red
+      ) {
+        return;
+      }
+
+      lastCaptionRef.current = nextCaption;
+      setCaption(nextCaption);
     };
 
     update();
@@ -360,7 +402,7 @@ function MissionMap({
         left: 14,
         width: size,
         pointerEvents: "none",
-        fontFamily: "Arial, sans-serif",
+        fontFamily: "var(--font-body)",
       }}
     >
       <canvas
