@@ -127,6 +127,10 @@ test("power why on Mars mentions dust", () => {
   const r = handleNovaQuestion("power kom keno hoy?", mars);
   assert.ok(/dhulo/i.test(r.answer));
 });
+test("Banglish Mars power why variation mentions dust", () => {
+  const r = handleNovaQuestion("power keno kom hoy?", mars);
+  assert.ok(/dhulo/i.test(r.answer));
+});
 test("power why on Moon mentions the long night", () => {
   const r = handleNovaQuestion("why is power low", { mission: "moon", resources: { power: 20 } });
   assert.ok(r.answer.includes("14 Earth days"));
