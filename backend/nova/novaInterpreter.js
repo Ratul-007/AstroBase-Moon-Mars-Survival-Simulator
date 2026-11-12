@@ -385,7 +385,7 @@ function interpretQuestion(rawText, ctx = {}) {
     intents.push("whatif");
   }
 
-  if (has(/\bwhy\b/)) intents.push("why");
+  if (has(/\bwhy\b|\bkeno\b/)) intents.push("why");
 
   if (
     has(/\bhint\b|\bki korbo\b|\bwhat should i (do|try)\b|\bwhat do i do\b/)
