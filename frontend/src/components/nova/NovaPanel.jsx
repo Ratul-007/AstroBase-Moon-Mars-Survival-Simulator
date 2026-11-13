@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { useMissionSession } from "../MissionSessionContext";
 
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+
 function getSourceUrl(link) {
   if (typeof link === "string") {
     return link;
@@ -71,7 +73,7 @@ function NovaPanel({ planet = "moon", survivalState, onClose }) {
           content: item.text,
         }));
 
-      const response = await fetch("/api/answer", {
+      const response = await fetch(`${API_BASE_URL}/api/answer`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -141,3 +141,13 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Local backups and temporary work
+/AstroBase-Backup/
+/AstroBase-Push-Work/
+/Junior_Astronaut_Demo.mp4
+/App.css.backup
+/movement-search.txt
+/backend/nova/server.js.bak
+/backend/nova/applyNovaPatch.js
+/~$nior_Astronaut_Role_Guide.pdf

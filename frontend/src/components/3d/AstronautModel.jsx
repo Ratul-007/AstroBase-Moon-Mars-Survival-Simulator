@@ -190,3 +190,4 @@ function AstronautModel({
 useGLTF.preload(MODEL_PATH);
 
 export default AstronautModel;
+
