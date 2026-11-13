@@ -1,203 +1,607 @@
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
 
-const ROCKS = [
-  [-5, 0.2, -3, 0.65],
-  [-4, 0.15, 3, 0.4],
-  [5, 0.2, -3, 0.7],
-  [4.5, 0.2, 3.5, 0.5],
-  [-2, 0.15, -5, 0.35],
-  [3, 0.15, -5, 0.45],
-  [6, 0.15, 0, 0.35],
-  [-6, 0.15, 0, 0.4],
+import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import * as THREE from "three";
+
+import PlayerController from "./PlayerController";
+import { TaskStationMarker, ObjectiveGuide } from "./TaskStations";
+import MissionMap from "../MissionMap";
+import PerseveranceRover from "./PerseveranceRover";
+import NasaModel from "./NasaModel";
+
+const CHUNK_SIZE = 48;
+const CHUNK_RADIUS = 2;
+const CHUNK_SEGMENTS = 12;
+
+const DEFAULT_WORLD_CONFIG = {
+  worldRadius: 120,
+  safeZoneRadius: 24,
+  safeZoneCenter: { x: 0, z: 0 },
+};
+
+function SceneReadyReporter({ onReady }) {
+  const readyRef = useRef(false);
+
+  useFrame(() => {
+    if (readyRef.current) return;
+    readyRef.current = true;
+    onReady?.();
+  });
+
+  return null;
+}
+
+export const INTERACTION_TARGETS = [
+  {
+    id: "supply-cache-01",
+    type: "supplies",
+    label: "Emergency Supply Cache",
+    key: "e",
+    position: { x: 5.5, z: -3.5 },
+    radius: 3,
+  },
+  {
+    id: "solar-array-01",
+    type: "solar",
+    label: "Solar Array",
+    key: "f",
+    position: { x: -2.2, z: 1.1 },
+    radius: 3,
+  },
+  {
+    id: "rover-check-01",
+    type: "rover",
+    label: "Exploration Rover",
+    key: "r",
+    position: { x: 2.5, z: 1.6 },
+    radius: 3,
+  },
 ];
 
-function Terrain({ mars }) {
-  const groundColor = mars ? "#8e4633" : "#777d86";
-  const rockColor = mars ? "#60352b" : "#484e58";
+const ROCKS = [
+  { position: [-4, 0.12, -2.5], scale: [0.7, 0.35, 0.55] },
+  { position: [3.8, 0.12, -2.8], scale: [0.9, 0.4, 0.7] },
+  { position: [-3.5, 0.12, 2.5], scale: [0.6, 0.3, 0.7] },
+  { position: [4.2, 0.12, 2.4], scale: [0.65, 0.3, 0.5] },
+  { position: [0.5, 0.12, -4], scale: [0.8, 0.25, 0.55] },
+  { position: [-1.8, 0.12, 3.8], scale: [0.7, 0.3, 0.45] },
+  { position: [1.5, 0.12, -5.2], scale: [0.5, 0.22, 0.4] },
+  { position: [-6, 0.12, 0.5], scale: [0.45, 0.2, 0.6] },
+  { position: [6, 0.12, -4.5], scale: [0.55, 0.25, 0.4] },
+];
+
+const CRATERS = [
+  [-5, -4, 1.2],
+  [5, -1, 0.8],
+  [-4, 4, 0.7],
+  [4, 4.5, 1],
+  [6, 1.5, 0.65],
+  [-6, -1.5, 0.75],
+];
+
+const OUTPOST_OBSTACLES = [
+  { type: "circle", x: 0, z: 0, radius: 1.45 },
+  { type: "circle", x: -1.4, z: 0, radius: 0.38 },
+  { type: "circle", x: 1.4, z: 0, radius: 0.38 },
+  { type: "box", x: -2.2, z: 1.1, width: 2.6, depth: 1.5 },
+  { type: "box", x: -2.2, z: 2.7, width: 2.6, depth: 1.5 },
+  { type: "box", x: 2.5, z: 1.6, width: 1.9, depth: 1.6 },
+  { type: "circle", x: -2.5, z: -1.2, radius: 0.4 },
+  { type: "circle", x: -4, z: -2.5, radius: 0.55 },
+  { type: "circle", x: 3.8, z: -2.8, radius: 0.65 },
+  { type: "circle", x: -3.5, z: 2.5, radius: 0.5 },
+  { type: "circle", x: 4.2, z: 2.4, radius: 0.5 },
+  { type: "circle", x: 0.5, z: -4, radius: 0.5 },
+  { type: "circle", x: -1.8, z: 3.8, radius: 0.5 },
+  { type: "circle", x: 1.5, z: -5.2, radius: 0.4 },
+  { type: "circle", x: -6, z: 0.5, radius: 0.4 },
+  { type: "circle", x: 6, z: -4.5, radius: 0.45 },
+];
+
+function seededRandom(seed) {
+  let value = seed >>> 0;
+
+  return () => {
+    value = (value * 1664525 + 1013904223) >>> 0;
+    return value / 4294967296;
+  };
+}
+
+function StarField({ mars }) {
+  const starPositions = useMemo(() => {
+    const positions = [];
+    const random = seededRandom(2026);
+
+    for (let i = 0; i < 650; i += 1) {
+      const theta = random() * Math.PI * 2;
+      const y = random() * 2 - 1;
+      const radius = 75 + random() * 20;
+      const horizontal = Math.sqrt(1 - y * y);
+
+      positions.push(
+        Math.cos(theta) * horizontal * radius,
+        y * radius,
+        Math.sin(theta) * horizontal * radius
+      );
+    }
+
+    return new Float32Array(positions);
+  }, []);
+
+  return (
+    <points frustumCulled={false} renderOrder={-1}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          args={[starPositions, 3]}
+        />
+      </bufferGeometry>
+
+      <pointsMaterial
+        color={mars ? "#ffe2cf" : "#dceaff"}
+        size={0.11}
+        sizeAttenuation
+        transparent
+        opacity={0.9}
+        depthWrite={false}
+        fog={false}
+      />
+    </points>
+  );
+}
+
+function TerrainChunk({ cx, cz, mars }) {
+  const features = useMemo(() => {
+    const random = seededRandom(
+      ((cx + 1000) * 73856093) ^
+        ((cz + 1000) * 19349663) ^
+        (mars ? 0x45a91 : 0x17329)
+    );
+
+    const result = [];
+
+    for (let i = 0; i < 10; i += 1) {
+      const x = (random() - 0.5) * CHUNK_SIZE;
+      const z = (random() - 0.5) * CHUNK_SIZE;
+      const worldX = cx * CHUNK_SIZE + x;
+      const worldZ = cz * CHUNK_SIZE + z;
+
+      if (Math.hypot(worldX, worldZ) < 20) continue;
+
+      result.push({
+        key: `${cx}-${cz}-${i}`,
+        x,
+        z,
+        scale: 0.35 + random() * 1.1,
+        rotation: random() * Math.PI * 2,
+        crater: random() > 0.58,
+      });
+    }
+
+    return result;
+  }, [cx, cz, mars]);
+
+  const geometry = useMemo(() => {
+    const geo = new THREE.PlaneGeometry(
+      CHUNK_SIZE,
+      CHUNK_SIZE,
+      CHUNK_SEGMENTS,
+      CHUNK_SEGMENTS
+    );
+
+    geo.rotateX(-Math.PI / 2);
+
+    const position = geo.attributes.position;
+    const random = seededRandom(
+      ((cx + 100) * 92837111) ^
+        ((cz + 100) * 689287499) ^
+        (mars ? 193 : 71)
+    );
+
+    for (let i = 0; i < position.count; i += 1) {
+      const x = position.getX(i);
+      const z = position.getZ(i);
+
+      const broad =
+        Math.sin((x + cx * 4) * 0.12) *
+        Math.cos((z + cz * 3) * 0.1);
+
+      const fine = (random() - 0.5) * (mars ? 0.12 : 0.08);
+
+      position.setY(
+        i,
+        broad * (mars ? 0.17 : 0.1) + fine
+      );
+    }
+
+    geo.computeVertexNormals();
+    return geo;
+  }, [cx, cz, mars]);
+
+  const groundColor = mars ? "#854536" : "#747b87";
+  const rockColor = mars ? "#a75b43" : "#777e89";
+  const craterColor = mars ? "#62352b" : "#505763";
+
+  return (
+    <group position={[cx * CHUNK_SIZE, 0, cz * CHUNK_SIZE]}>
+      <mesh geometry={geometry}>
+        <meshStandardMaterial
+          color={groundColor}
+          roughness={1}
+          metalness={0}
+        />
+      </mesh>
+
+      {features.map((feature) =>
+        feature.crater ? (
+          <group
+            key={feature.key}
+            position={[feature.x, 0.025, feature.z]}
+          >
+            <mesh rotation={[-Math.PI / 2, 0, 0]}>
+              <ringGeometry
+                args={[
+                  feature.scale * 0.55,
+                  feature.scale,
+                  24,
+                ]}
+              />
+              <meshStandardMaterial
+                color={craterColor}
+                roughness={1}
+              />
+            </mesh>
+
+            <mesh
+              position={[0, -0.008, 0]}
+              rotation={[-Math.PI / 2, 0, 0]}
+            >
+              <circleGeometry
+                args={[feature.scale * 0.54, 20]}
+              />
+              <meshStandardMaterial
+                color={mars ? "#98513e" : "#666d78"}
+                roughness={1}
+              />
+            </mesh>
+          </group>
+        ) : (
+          <mesh
+            key={feature.key}
+            position={[
+              feature.x,
+              feature.scale * 0.12,
+              feature.z,
+            ]}
+            rotation={[0.1, feature.rotation, 0.1]}
+            scale={[
+              feature.scale * 1.2,
+              feature.scale * 0.65,
+              feature.scale,
+            ]}
+            frustumCulled
+          >
+            <dodecahedronGeometry args={[0.8, 0]} />
+            <meshStandardMaterial
+              color={rockColor}
+              roughness={1}
+            />
+          </mesh>
+        )
+      )}
+    </group>
+  );
+}
+
+function ExpandableTerrain({ mars, playerPosRef, worldRadius }) {
+  const [activeChunks, updateActiveChunks] = useState(() => {
+    const initial = [];
+
+    for (let x = -CHUNK_RADIUS; x <= CHUNK_RADIUS; x += 1) {
+      for (let z = -CHUNK_RADIUS; z <= CHUNK_RADIUS; z += 1) {
+        initial.push({ cx: x, cz: z });
+      }
+    }
+
+    return initial;
+  });
+
+  const tracker = useRef({ cx: 999999, cz: 999999 });
+
+  useFrame(() => {
+    const position = playerPosRef?.current;
+    if (!position) return;
+
+    const cx = Math.floor(position.x / CHUNK_SIZE);
+    const cz = Math.floor(position.z / CHUNK_SIZE);
+
+    if (cx === tracker.current.cx && cz === tracker.current.cz) {
+      return;
+    }
+
+    tracker.current = { cx, cz };
+
+    const next = [];
+
+    for (
+      let x = cx - CHUNK_RADIUS;
+      x <= cx + CHUNK_RADIUS;
+      x += 1
+    ) {
+      for (
+        let z = cz - CHUNK_RADIUS;
+        z <= cz + CHUNK_RADIUS;
+        z += 1
+      ) {
+        const centerX = (x + 0.5) * CHUNK_SIZE;
+        const centerZ = (z + 0.5) * CHUNK_SIZE;
+
+        if (
+          Math.hypot(centerX, centerZ) >
+          worldRadius + CHUNK_SIZE
+        ) {
+          continue;
+        }
+
+        next.push({ cx: x, cz: z });
+      }
+    }
+
+    updateActiveChunks(next);
+  });
 
   return (
     <group>
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -0.12, 0]}
-        receiveShadow
-      >
-        <planeGeometry args={[32, 32]} />
-        <meshStandardMaterial color={groundColor} roughness={1} />
-      </mesh>
+      {activeChunks.map(({ cx, cz }) => (
+        <TerrainChunk
+          key={`${cx}:${cz}`}
+          cx={cx}
+          cz={cz}
+          mars={mars}
+        />
+      ))}
+    </group>
+  );
+}
 
-      {ROCKS.map(([x, y, z, scale], index) => (
+function Terrain({ mars }) {
+  const rockColor = mars ? "#b56548" : "#a6abb3";
+  const craterColor = mars ? "#63352d" : "#505763";
+
+  return (
+    <group>
+      {ROCKS.map((rock, index) => (
         <mesh
-          key={index}
-          position={[x, y, z]}
-          scale={[scale * 1.3, scale * 0.65, scale]}
-          rotation={[0.2 * index, 0.4 * index, 0.1]}
+          key={`rock-${index}`}
+          position={rock.position}
+          scale={rock.scale}
+          rotation={[0.1 * index, 0.2 * index, 0.1]}
           castShadow
+          receiveShadow
         >
           <dodecahedronGeometry args={[1, 0]} />
-          <meshStandardMaterial color={rockColor} roughness={1} />
-        </mesh>
-      ))}
-
-      {[
-        [-3.5, 2.8, 0.8],
-        [3.5, -2.5, 1.1],
-        [0.5, 4, 0.6],
-      ].map(([x, z, scale], index) => (
-        <mesh
-          key={`crater-${index}`}
-          position={[x, -0.105, z]}
-          rotation={[-Math.PI / 2, 0, 0]}
-          scale={[scale * 1.5, scale, 1]}
-        >
-          <circleGeometry args={[1, 24]} />
           <meshStandardMaterial
-            color={mars ? "#71392d" : "#5c626b"}
+            color={rockColor}
             roughness={1}
           />
         </mesh>
       ))}
+
+      {CRATERS.map(([x, z, radius], index) => (
+        <group
+          key={`crater-${index}`}
+          position={[x, 0.028, z]}
+        >
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[radius * 0.65, radius, 40]} />
+            <meshStandardMaterial
+              color={craterColor}
+              roughness={1}
+            />
+          </mesh>
+
+          <mesh
+            position={[0, -0.006, 0]}
+            rotation={[-Math.PI / 2, 0, 0]}
+          >
+            <circleGeometry args={[radius * 0.64, 32]} />
+            <meshStandardMaterial
+              color={mars ? "#98513e" : "#666d78"}
+              roughness={1}
+            />
+          </mesh>
+        </group>
+      ))}
+
+      {Array.from({ length: 36 }, (_, index) => {
+        const x = Math.sin(index * 12.9898) * 7.5;
+        const z = Math.cos(index * 7.233) * 7.5;
+        const size = 0.06 + (index % 4) * 0.035;
+
+        return (
+          <mesh
+            key={`pebble-${index}`}
+            position={[x, size * 0.55, z]}
+            scale={[1.4, 0.8, 1]}
+            rotation={[0.2, index, 0.1]}
+            castShadow
+          >
+            <icosahedronGeometry args={[size, 0]} />
+            <meshStandardMaterial
+              color={mars ? "#9c5845" : "#9096a0"}
+              roughness={1}
+            />
+          </mesh>
+        );
+      })}
     </group>
   );
 }
 
+// NASA Base Station model replaces the previous procedural habitat.
+// Original habitat position is preserved.
 function Habitat() {
   return (
-    <group>
-      <mesh position={[0, 0.65, 0]} castShadow>
-        <cylinderGeometry args={[1.05, 1.2, 1.3, 12]} />
-        <meshStandardMaterial
-          color="#d5dbe5"
-          metalness={0.25}
-          roughness={0.65}
-        />
-      </mesh>
+    <NasaModel
+      path="/models/nasa/base-station.glb"
+      targetSize={4.0}
+      position={[0, 0, 0]}
+      rotation={[0, 0, 0]}
+    />
+  );
+}
 
-      <mesh position={[0, 1.45, 0]} castShadow>
-        <sphereGeometry
-          args={[0.85, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2]}
-        />
+// NASA ACRIMSAT satellite visual.
+function SolarArray({ position }) {
+  return (
+    <NasaModel
+      path="/models/nasa/acrimsat-a.glb"
+      targetSize={3.2}
+      position={position}
+      rotation={[0, 0, 0]}
+    />
+  );
+}
+
+// NASA Perseverance rover visual.
+function Rover() {
+  return (
+    <group
+      position={[2.5, 0, 1.6]}
+      rotation={[0, -0.35, 0]}
+    >
+      <PerseveranceRover />
+    </group>
+  );
+}
+
+// NASA Crew Lock Bag visual.
+function SupplyCache({ mars }) {
+  return (
+    <group position={[5.5, 0, -3.5]}>
+      <NasaModel
+        path="/models/nasa/crew-lock-bag.glb"
+        targetSize={1.1}
+        position={[0, 0, 0]}
+        rotation={[0, 0, 0]}
+      />
+
+      <pointLight
+        position={[0, 1.15, 0]}
+        color={mars ? "#ffb08a" : "#7dd3fc"}
+        intensity={0.55}
+        distance={3}
+      />
+    </group>
+  );
+}
+
+function CommunicationAntenna({ mars }) {
+  return (
+    <group position={[-2.5, 0, -1.2]}>
+      <mesh position={[0, 1.2, 0]} castShadow>
+        <cylinderGeometry args={[0.045, 0.07, 2.4, 14]} />
         <meshStandardMaterial
-          color="#91b8c9"
-          metalness={0.15}
+          color="#d5dde6"
+          metalness={0.6}
           roughness={0.4}
         />
       </mesh>
 
-      <mesh position={[0, 0.45, 1.16]}>
-        <boxGeometry args={[0.42, 0.75, 0.12]} />
-        <meshStandardMaterial color="#273746" />
-      </mesh>
-
-      <mesh position={[0.48, 0.9, 0.99]}>
-        <boxGeometry args={[0.3, 0.27, 0.08]} />
+      <mesh
+        position={[0, 2.25, 0]}
+        rotation={[Math.PI / 2.8, 0, 0]}
+        castShadow
+      >
+        <torusGeometry args={[0.38, 0.045, 12, 32]} />
         <meshStandardMaterial
-          color="#64d9ff"
-          emissive="#123849"
+          color="#e1e8ef"
+          metalness={0.7}
+          roughness={0.3}
         />
       </mesh>
 
-      <mesh position={[-1.35, 0.4, 0]}>
-        <cylinderGeometry args={[0.35, 0.4, 0.8, 10]} />
-        <meshStandardMaterial color="#aeb9c7" />
+      <mesh position={[0, 2.25, 0.08]}>
+        <sphereGeometry args={[0.08, 12, 12]} />
+        <meshStandardMaterial
+          color={mars ? "#ffb08a" : "#59c7ff"}
+          emissive={mars ? "#7c2d12" : "#123b54"}
+          emissiveIntensity={0.8}
+        />
       </mesh>
 
-      <mesh position={[1.35, 0.4, 0]}>
-        <cylinderGeometry args={[0.35, 0.4, 0.8, 10]} />
-        <meshStandardMaterial color="#aeb9c7" />
-      </mesh>
-    </group>
-  );
-}
-
-function SolarArray({ position }) {
-  return (
-    <group position={position} rotation={[0, 0.15, 0]}>
-      <mesh position={[0, 0.55, 0]} castShadow>
-        <boxGeometry args={[0.09, 1.1, 0.09]} />
-        <meshStandardMaterial color="#b7c2cf" />
-      </mesh>
-
-      {[-0.65, 0.65].map((x) => (
-        <group key={x} position={[x, 1, 0]}>
-          <mesh rotation={[0, 0, -0.08]} castShadow>
-            <boxGeometry args={[1.1, 0.07, 1.5]} />
-            <meshStandardMaterial color="#aeb9c7" />
-          </mesh>
-
-          <mesh position={[0, 0.055, 0]}>
-            <boxGeometry args={[1, 0.035, 1.38]} />
-            <meshStandardMaterial
-              color="#153e79"
-              metalness={0.45}
-              roughness={0.35}
-            />
-          </mesh>
-
-          {[-0.25, 0, 0.25].map((z) => (
-            <mesh key={z} position={[0, 0.078, z]}>
-              <boxGeometry args={[1, 0.012, 0.018]} />
-              <meshStandardMaterial color="#72c9ff" />
-            </mesh>
-          ))}
-        </group>
-      )}
-    </group>
-  );
-}
-
-function Rover() {
-  return (
-    <group position={[2.6, 0.35, 1.8]} rotation={[0, -0.4, 0]}>
-      <mesh castShadow position={[0, 0.25, 0]}>
-        <boxGeometry args={[1.2, 0.35, 0.8]} />
-        <meshStandardMaterial color="#d6a74f" metalness={0.25} />
-      </mesh>
-
-      <mesh position={[0, 0.52, 0]}>
-        <boxGeometry args={[0.5, 0.3, 0.45]} />
-        <meshStandardMaterial color="#c9d4df" />
-      </mesh>
-
-      {[-0.43, 0.43].flatMap((x) =>
-        [-0.3, 0.3].map((z) => (
-          <mesh
-            key={`${x}-${z}`}
-            position={[x, -0.02, z]}
-            rotation={[Math.PI / 2, 0, 0]}
-            castShadow
-          >
-            <cylinderGeometry args={[0.19, 0.19, 0.13, 12]} />
-            <meshStandardMaterial color="#252c35" roughness={1} />
-          </mesh>
-        ))
-      )}
-
-      <mesh position={[-0.85, 0.42, 0]}>
-        <boxGeometry args={[0.65, 0.05, 0.5]} />
-        <meshStandardMaterial color="#174c8b" />
+      <mesh position={[0, 0.12, 0]} castShadow>
+        <cylinderGeometry args={[0.28, 0.32, 0.24, 16]} />
+        <meshStandardMaterial color="#657586" />
       </mesh>
     </group>
   );
 }
 
-function CommunicationAntenna() {
+function ZoneRing({
+  survivalRef,
+  center = [0, 0, 0],
+  radius = 24,
+  height = 3,
+}) {
+  const group = useRef();
+  const ringMat = useRef();
+  const wallMat = useRef();
+
+  useFrame(({ clock }) => {
+    const state = survivalRef?.current;
+    if (!group.current) return;
+
+    const activeRadius =
+      Number.isFinite(state?.radius) && state.radius > 0
+        ? state.radius
+        : radius;
+
+    group.current.scale.set(activeRadius, 1, activeRadius);
+
+    const inZone = state?.inZone !== false;
+    const color = inZone ? "#38bdf8" : "#ef4444";
+
+    if (ringMat.current) {
+      ringMat.current.color.set(color);
+      ringMat.current.opacity = inZone ? 0.95 : 1;
+    }
+
+    if (wallMat.current) {
+      wallMat.current.color.set(color);
+      wallMat.current.opacity =
+        (inZone ? 0.055 : 0.13) +
+        0.025 * Math.sin(clock.elapsedTime * 2.5);
+    }
+  });
+
   return (
-    <group position={[0, 0, -2.2]}>
-      <mesh position={[0, 0.8, 0]}>
-        <cylinderGeometry args={[0.035, 0.06, 1.6, 8]} />
-        <meshStandardMaterial color="#c7d0d9" />
+    <group ref={group} position={center}>
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, 0.06, 0]}
+      >
+        <ringGeometry args={[0.985, 1, 128]} />
+        <meshBasicMaterial
+          ref={ringMat}
+          color="#38bdf8"
+          transparent
+          opacity={0.95}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+        />
       </mesh>
 
-      <mesh position={[0, 1.55, 0]}>
-        <sphereGeometry args={[0.16, 12, 8]} />
-        <meshStandardMaterial color="#e6edf5" metalness={0.35} />
-      </mesh>
-
-      <mesh position={[0, 1.55, 0.12]} rotation={[0.4, 0, 0]}>
-        <torusGeometry args={[0.18, 0.025, 6, 16]} />
-        <meshStandardMaterial color="#b8c8d9" />
+      <mesh position={[0, height / 2, 0]}>
+        <cylinderGeometry args={[1, 1, height, 128, 1, true]} />
+        <meshBasicMaterial
+          ref={wallMat}
+          color="#38bdf8"
+          transparent
+          opacity={0.08}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+        />
       </mesh>
     </group>
   );
@@ -205,152 +609,343 @@ function CommunicationAntenna() {
 
 function Outpost({ mars }) {
   return (
-    <>
+    <group>
       <Terrain mars={mars} />
+
       <Habitat />
-      <SolarArray position={[-2.7, 0, -0.8]} />
-      <SolarArray position={[-2.7, 0, 1.5]} />
+
+      <SolarArray position={[-2.2, 0, 1.1]} />
+      <SolarArray position={[-2.2, 0, 2.7]} />
+
       <Rover />
-      <CommunicationAntenna />
-    </>
+      <SupplyCache mars={mars} />
+      <CommunicationAntenna mars={mars} />
+    </group>
   );
 }
 
-export default function MissionScene({ planet = "moon" }) {
+function MissionScene({
+  planet = "moon",
+  active = true,
+  onReady,
+  playerPosRef,
+  survivalRef,
+  worldConfig = DEFAULT_WORLD_CONFIG,
+  onPhysicalInteraction,
+  onFootstep,
+  taskInfo = null,
+  cameraMode = "follow",
+}) {
   const mars = planet === "mars";
-  const sceneName = mars ? "Mars Outpost" : "Lunar Outpost";
-  const sceneColor = mars ? "#8b4b38" : "#172131";
+  const skyColor = mars ? "#301c20" : "#070d19";
+  const title = mars ? "MARS OUTPOST" : "LUNAR OUTPOST";
+  const accentColor = mars ? "#ffad8a" : "#7dd3fc";
+
+  const [interactionPrompt, setInteractionPrompt] = useState(null);
+
+  const worldRadius =
+    Number.isFinite(worldConfig?.worldRadius) &&
+    worldConfig.worldRadius > 0
+      ? worldConfig.worldRadius
+      : DEFAULT_WORLD_CONFIG.worldRadius;
+
+  const safeZoneRadius =
+    Number.isFinite(worldConfig?.safeZoneRadius) &&
+    worldConfig.safeZoneRadius > 0
+      ? worldConfig.safeZoneRadius
+      : DEFAULT_WORLD_CONFIG.safeZoneRadius;
+
+  const center = worldConfig?.safeZoneCenter ?? { x: 0, z: 0 };
+
+  const activeStep = taskInfo?.step ?? null;
+
+  const interactionTargets = useMemo(() => {
+    if (
+      !activeStep ||
+      activeStep.existing ||
+      !activeStep.position
+    ) {
+      return INTERACTION_TARGETS;
+    }
+
+    return [
+      ...INTERACTION_TARGETS,
+      {
+        id: activeStep.stationId,
+        type: "station",
+        label: activeStep.label,
+        key: activeStep.key ?? "e",
+        position: activeStep.position,
+        radius: 3.2,
+      },
+    ];
+  }, [activeStep]);
 
   const panelStyle = {
     position: "absolute",
     zIndex: 2,
-    color: "#f4f7fb",
-    background: "rgba(8, 15, 30, 0.84)",
-    border: "1px solid rgba(130, 180, 220, 0.3)",
-    borderRadius: 12,
-    padding: 12,
-    fontFamily: "system-ui, sans-serif",
+    color: "#f1f5f9",
+    background: "rgba(5, 12, 25, 0.82)",
+    border: `1px solid ${
+      mars
+        ? "rgba(255, 173, 138, 0.4)"
+        : "rgba(125, 211, 252, 0.4)"
+    }`,
+    borderRadius: 10,
+    padding: "12px 16px",
+    fontFamily: "var(--font-body)",
+    pointerEvents: "none",
     backdropFilter: "blur(8px)",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.18)",
   };
 
   return (
     <section
-      aria-label={`${sceneName} 3D environment`}
       style={{
-        position: "relative",
+        position: "absolute",
+        inset: 0,
         width: "100%",
-        height: "clamp(360px, 58vh, 600px)",
-        minHeight: 360,
+        height: "100%",
         overflow: "hidden",
-        borderRadius: 16,
-        background: sceneColor,
-        border: "1px solid rgba(120, 160, 200, 0.25)",
+        background: skyColor,
       }}
     >
       <Canvas
+        frameloop={active ? "always" : "demand"}
         shadows
-        dpr={[1, 1.5]}
+        dpr={[1, 1.25]}
+        gl={{
+          antialias: false,
+          powerPreference: "high-performance",
+        }}
         camera={{
           position: [8, 7, 10],
-          fov: 42,
+          fov: 45,
           near: 0.1,
-          far: 100,
+          far: 180,
         }}
-        gl={{ antialias: true, powerPreference: "default" }}
-        fallback={
-          <div style={{ padding: 24, color: "white" }}>
-            Your browser could not start the 3D scene.
-          </div>
-        }
       >
-        <color attach="background" args={[sceneColor]} />
-        <fog attach="fog" args={[sceneColor, 18, 36]} />
+        <color attach="background" args={[skyColor]} />
+        <fog attach="fog" args={[skyColor, 55, 145]} />
+        <SceneReadyReporter onReady={onReady} />
 
-        <ambientLight intensity={mars ? 1.25 : 1} />
+        <StarField mars={mars} />
 
-        <directionalLight
-          position={[6, 10, 5]}
-          intensity={mars ? 2 : 2.5}
-          castShadow
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
+        <hemisphereLight
+          args={[
+            mars ? "#d58b77" : "#b7d2ff",
+            mars ? "#42241d" : "#343b4a",
+            mars ? 1.05 : 0.75,
+          ]}
         />
 
-        <hemisphereLight args={["#a9c7ff", "#51463c", 0.6]} />
+        <directionalLight
+          position={[-7, 12, 6]}
+          intensity={mars ? 2.3 : 3.1}
+          color={mars ? "#ffd0b5" : "#fff3d7"}
+          castShadow
+          shadow-mapSize-width={512}
+          shadow-mapSize-height={512}
+          shadow-camera-left={-30}
+          shadow-camera-right={30}
+          shadow-camera-top={30}
+          shadow-camera-bottom={-30}
+          shadow-normalBias={0.035}
+        />
+
+        <directionalLight
+          position={[5, 6, -6]}
+          intensity={mars ? 0.65 : 0.9}
+          color={mars ? "#e9a18b" : "#9ccaff"}
+        />
+
+        <pointLight
+          position={[-4, 4, -4]}
+          intensity={mars ? 0.7 : 0.5}
+          color={mars ? "#ff9b76" : "#8acbff"}
+          distance={22}
+        />
+
+        {mars && (
+          <pointLight
+            position={[4, 2, 4]}
+            intensity={0.35}
+            color="#d86b4c"
+            distance={15}
+          />
+        )}
 
         <Outpost mars={mars} />
 
-        <OrbitControls
-          makeDefault
-          enableDamping
-          dampingFactor={0.08}
-          enablePan={false}
-          minDistance={5}
-          maxDistance={17}
-          minPolarAngle={0.2}
-          maxPolarAngle={Math.PI / 2.05}
-          target={[0, 0.5, 0]}
+        <ExpandableTerrain
+          mars={mars}
+          playerPosRef={playerPosRef}
+          worldRadius={worldRadius}
+        />
+
+        <ZoneRing
+          survivalRef={survivalRef}
+          center={[center.x ?? 0, 0, center.z ?? 0]}
+          radius={safeZoneRadius}
+        />
+
+        <TaskStationMarker step={activeStep} />
+
+        <PlayerController
+          obstacles={OUTPOST_OBSTACLES}
+          playerPosRef={playerPosRef}
+          worldRadius={worldRadius}
+          interactionTargets={interactionTargets}
+          onPhysicalInteraction={onPhysicalInteraction}
+          onFootstep={onFootstep}
+          onInteractionPromptChange={setInteractionPrompt}
+          cameraMode={cameraMode}
+          enabled={active}
         />
       </Canvas>
 
-      <div
-        style={{
-          ...panelStyle,
-          top: 12,
-          left: 12,
-          right: 12,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          flexWrap: "wrap",
+      <MissionMap
+        playerPosRef={playerPosRef}
+        survivalRef={survivalRef}
+        taskInfo={taskInfo}
+        targets={interactionTargets}
+        safeZone={{
+          center: {
+            x: center.x ?? 0,
+            z: center.z ?? 0,
+          },
+          radius: safeZoneRadius,
         }}
-      >
-        <div>
-          <div
-            style={{
-              fontSize: 11,
-              letterSpacing: 2,
-              color: "#8fcfff",
-              fontWeight: 700,
-            }}
-          >
-            ASTROBASE // 3D ENVIRONMENT
-          </div>
+        worldRadius={worldRadius}
+      />
 
-          <div style={{ fontSize: 19, fontWeight: 800, marginTop: 4 }}>
-            {sceneName}
-          </div>
-        </div>
-
-        <span
+      {interactionPrompt && (
+        <div
+          role="status"
+          aria-live="polite"
           style={{
-            border: "1px solid #47617c",
-            borderRadius: 20,
-            padding: "7px 11px",
-            fontSize: 12,
+            position: "absolute",
+            zIndex: 10,
+            left: "50%",
+            bottom: 100,
+            transform: "translateX(-50%)",
+            width: "max-content",
+            maxWidth: "calc(100% - 32px)",
+            boxSizing: "border-box",
+            padding: "13px 18px",
+            borderRadius: 12,
+            border: `1px solid ${
+              mars
+                ? "rgba(255, 173, 138, 0.65)"
+                : "rgba(125, 211, 252, 0.65)"
+            }`,
+            background: "rgba(5, 12, 25, 0.94)",
+            color: "#f8fafc",
+            textAlign: "center",
+            fontFamily: "var(--font-body)",
+            boxShadow: "0 8px 28px rgba(0, 0, 0, 0.4)",
+            pointerEvents: "none",
           }}
         >
-          {mars ? "MARS SURFACE" : "LUNAR SURFACE"}
-        </span>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>
+            {interactionPrompt.key?.toUpperCase()} —{" "}
+            {interactionPrompt.label}
+          </div>
+
+          <div
+            style={{
+              marginTop: 5,
+              fontSize: 11,
+              color: "#cbd5e1",
+            }}
+          >
+            Press {interactionPrompt.key?.toUpperCase()} to interact
+          </div>
+        </div>
+      )}
+
+      <ObjectiveGuide
+        taskInfo={taskInfo}
+        playerPosRef={playerPosRef}
+      />
+
+      <div
+        className="scene-title-card"
+        style={{
+          ...panelStyle,
+          top: 14,
+          left: 14,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 11,
+            letterSpacing: 2,
+            color: accentColor,
+            marginBottom: 5,
+          }}
+        >
+          ASTROBASE
+          <span className="scene-hide-mobile"> // 3D ENVIRONMENT</span>
+        </div>
+
+        <div style={{ fontSize: 18, fontWeight: 700 }}>
+          {title}
+        </div>
+
+        <div
+          style={{
+            marginTop: 5,
+            fontSize: 11,
+            color: "#cbd5e1",
+          }}
+        >
+          {mars
+            ? "MARS SURFACE // RED PLANET"
+            : "LUNAR SURFACE // MOON"}
+        </div>
+
+        <div
+          className="scene-hide-mobile"
+          style={{
+            marginTop: 6,
+            fontSize: 11,
+            color: "#cbd5e1",
+          }}
+        >
+          World radius: {worldRadius} m
+        </div>
       </div>
 
       <div
+        className="scene-controls-hint"
         style={{
           ...panelStyle,
-          left: 12,
-          bottom: 12,
+          bottom: 14,
+          left: 14,
           fontSize: 12,
-          lineHeight: 1.6,
-          maxWidth: "calc(100% - 48px)",
         }}
       >
-        <strong>MISSION ENVIRONMENT</strong>
-        <div>Drag to rotate · Scroll or pinch to zoom</div>
-        <div style={{ color: "#9fb4c9" }}>
-          3D visual prototype · Gameplay integration comes next
+        WASD / Arrow Keys: Move · Shift: Run
+        <div style={{ marginTop: 5, color: accentColor }}>
+          Near an object: E Interact · F Solar · R Rover
         </div>
+      </div>
+
+      <div
+        className="scene-safe-chip"
+        style={{
+          ...panelStyle,
+          bottom: 14,
+          right: 14,
+          fontSize: 11,
+          color: "#cbd5e1",
+        }}
+      >
+        {`SAFE ZONE: ${safeZoneRadius} m`}
       </div>
     </section>
   );
 }
+
+export default memo(MissionScene);

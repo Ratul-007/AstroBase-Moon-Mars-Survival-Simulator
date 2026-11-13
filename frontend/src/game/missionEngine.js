@@ -1,3 +1,4 @@
+import { attachTask } from "./missionTasks";
 
 export const RESOURCE_META = {
   power: { label: "Power", unit: "%", color: "#f5c451" },
@@ -19,9 +20,14 @@ export const INITIAL_RESOURCES = {
   shielding: 85,
 };
 
-export const MISSION_DURATION = {
-  moon: 20,
-  mars: 30,
+export const MISSION_DURATION = { moon: 20, mars: 30 };
+
+const DAILY_CONSUMPTION = {
+  power: 1,
+  water: 1,
+  food: 1,
+  oxygen: 1,
+  shielding: 0,
 };
 
 const EVENT_DATA = {
@@ -47,7 +53,6 @@ const EVENT_DATA = {
     ["moon-19", "Scientific Equipment Overload", "A science experiment is consuming more power than planned.", "science"],
     ["moon-20", "Final Habitat Systems Check", "The crew must prepare all critical systems for the final mission review.", "logistics"],
   ],
-
   mars: [
     ["mars-01", "Regional Dust Storm", "A Martian dust storm is reducing solar generation across the outpost.", "weather"],
     ["mars-02", "Water Recovery Failure", "The water recovery system has stopped recycling water efficiently.", "water"],
@@ -82,244 +87,210 @@ const EVENT_DATA = {
   ],
 };
 
-const CHOICE_PROFILES = {
+/*
+ * Each event type has a different strategy.
+ * The displayed labels and feedback also include the current event,
+ * so the learning log identifies the actual incident being handled.
+ */
+const STRATEGIES = {
   power: [
     {
-      label: "Repair the power system",
-      description: "Use available resources to restore reliable power.",
+      action: "Repair and stabilize the power system",
       effects: { power: 8, water: -2 },
       score: 15,
-      feedback: "Power-system maintenance improved energy reliability.",
+      feedback: "Repair work improved power reliability.",
     },
     {
-      label: "Conserve energy",
-      description: "Reduce nonessential energy use.",
-      effects: { power: 3, oxygen: -2 },
+      action: "Switch to essential-load mode",
+      effects: { power: 4, oxygen: -1 },
       score: 8,
-      feedback: "Energy was conserved, although some systems had to reduce activity.",
+      feedback: "Essential-load mode conserved energy.",
     },
     {
-      label: "Ignore the warning",
-      description: "Continue operations without intervention.",
-      effects: { power: -12 },
+      action: "Defer the power intervention",
+      effects: { power: -10 },
       score: -12,
-      feedback: "The unresolved power problem reduced available energy.",
+      feedback: "The unresolved power problem increased risk.",
     },
   ],
-
   water: [
     {
-      label: "Repair the water system",
-      description: "Prioritize repairs and water recovery.",
-      effects: { water: 12, power: -5 },
+      action: "Repair and test the water system",
+      effects: { water: 10, power: -4 },
       score: 15,
-      feedback: "The water system was repaired and recovery improved.",
+      feedback: "Repairs improved water recovery.",
     },
     {
-      label: "Introduce water rationing",
-      description: "Reduce water use while planning repairs.",
-      effects: { water: 4, food: -2 },
+      action: "Ration water and isolate the fault",
+      effects: { water: 4, food: -1 },
       score: 8,
-      feedback: "Rationing reduced pressure on the remaining water supply.",
+      feedback: "Rationing reduced pressure on the water supply.",
     },
     {
-      label: "Delay the response",
-      description: "Continue operations without addressing the fault.",
-      effects: { water: -12 },
+      action: "Delay water-system maintenance",
+      effects: { water: -10 },
       score: -12,
-      feedback: "The water problem continued to affect the habitat.",
+      feedback: "The unresolved fault reduced water security.",
     },
   ],
-
   life: [
     {
-      label: "Repair life support",
-      description: "Prioritize air quality and oxygen safety.",
-      effects: { oxygen: 10, power: -6 },
+      action: "Prioritize life-support repair",
+      effects: { oxygen: 10, power: -5 },
       score: 18,
-      feedback: "The crew restored safer life-support operation.",
+      feedback: "Life-support intervention improved crew safety.",
     },
     {
-      label: "Activate backup systems",
-      description: "Use backup capacity while reducing activity.",
-      effects: { oxygen: 5, food: -3 },
+      action: "Activate backup life-support equipment",
+      effects: { oxygen: 5, food: -2 },
       score: 9,
-      feedback: "Backup systems helped stabilize the habitat.",
+      feedback: "Backup equipment reduced immediate risk.",
     },
     {
-      label: "Postpone maintenance",
-      description: "Monitor the fault without fixing it now.",
-      effects: { oxygen: -12 },
+      action: "Postpone life-support maintenance",
+      effects: { oxygen: -10 },
       score: -15,
-      feedback: "The unresolved fault increased risk to the crew.",
+      feedback: "Delaying maintenance left the crew exposed to risk.",
     },
   ],
-
   radiation: [
     {
-      label: "Secure the radiation shelter",
-      description: "Move the crew to protection and secure the habitat.",
-      effects: { shielding: 12, power: -5 },
+      action: "Move the crew into the radiation shelter",
+      effects: { shielding: 10, power: -4 },
       score: 18,
       feedback: "Shelter procedures improved radiation protection.",
     },
     {
-      label: "Reinforce shielding",
-      description: "Use available materials to improve protection.",
-      effects: { shielding: 7, food: -2 },
+      action: "Reinforce the habitat shielding",
+      effects: { shielding: 6, food: -1 },
       score: 10,
       feedback: "Additional shielding reduced exposure risk.",
     },
     {
-      label: "Continue normal operations",
-      description: "Accept the increased environmental risk.",
-      effects: { shielding: -15 },
+      action: "Continue without additional protection",
+      effects: { shielding: -12 },
       score: -15,
-      feedback: "The crew remained exposed to a greater radiation risk.",
+      feedback: "The crew remained at greater radiation risk.",
     },
   ],
-
   food: [
     {
-      label: "Protect food production",
-      description: "Repair storage or greenhouse systems.",
-      effects: { food: 12, power: -5 },
+      action: "Restore food storage or crop production",
+      effects: { food: 10, power: -4 },
       score: 15,
-      feedback: "Food storage and production became more reliable.",
+      feedback: "Food preservation and production improved.",
     },
     {
-      label: "Reorganize food supplies",
-      description: "Prioritize essential nutrition and reduce waste.",
-      effects: { food: 5, water: -2 },
+      action: "Reallocate food and reduce waste",
+      effects: { food: 4, water: -1 },
       score: 8,
-      feedback: "Careful rationing improved the use of available food.",
+      feedback: "Careful allocation extended available food supplies.",
     },
     {
-      label: "Ignore the shortage",
-      description: "Continue the current plan without adjustments.",
-      effects: { food: -12 },
+      action: "Leave the food issue unresolved",
+      effects: { food: -10 },
       score: -12,
-      feedback: "The food supply became less secure.",
+      feedback: "The food shortage became more difficult to manage.",
     },
   ],
-
   equipment: [
     {
-      label: "Repair the equipment",
-      description: "Use power and supplies to restore operation.",
-      effects: { power: -5, oxygen: 2 },
+      action: "Perform a controlled equipment repair",
+      effects: { power: -4, oxygen: 2 },
       score: 15,
-      feedback: "Maintenance restored equipment reliability.",
+      feedback: "Targeted maintenance improved equipment reliability.",
     },
     {
-      label: "Use a backup unit",
-      description: "Switch to a backup system where available.",
-      effects: { power: -3, shielding: 2 },
+      action: "Isolate the fault and use a backup",
+      effects: { power: -2, shielding: 1 },
       score: 8,
-      feedback: "The backup reduced immediate operational risk.",
+      feedback: "The backup plan reduced immediate disruption.",
     },
     {
-      label: "Defer maintenance",
-      description: "Keep working while postponing repairs.",
-      effects: { power: -7 },
+      action: "Continue without resolving the fault",
+      effects: { power: -6 },
       score: -10,
-      feedback: "The unresolved equipment issue may cause further disruption.",
+      feedback: "The equipment fault remained a mission risk.",
     },
   ],
-
   crew: [
     {
-      label: "Prioritize crew wellbeing",
-      description: "Provide rest and review the crew's condition.",
+      action: "Schedule crew rest and a health assessment",
       effects: { food: -2, oxygen: 2 },
       score: 15,
-      feedback: "Rest and monitoring improved the crew's readiness.",
+      feedback: "Rest and monitoring supported crew readiness.",
     },
     {
-      label: "Rebalance the workload",
-      description: "Redistribute tasks and postpone nonessential work.",
-      effects: { power: 2, food: -1 },
+      action: "Redistribute tasks across the crew",
+      effects: { power: 1, food: -1 },
       score: 8,
-      feedback: "The revised schedule reduced pressure on the crew.",
+      feedback: "A revised workload reduced crew pressure.",
     },
     {
-      label: "Continue the full schedule",
-      description: "Keep all planned tasks active.",
-      effects: { food: -5, oxygen: -3 },
+      action: "Maintain the full workload",
+      effects: { food: -4, oxygen: -2 },
       score: -10,
-      feedback: "The demanding schedule increased crew and resource strain.",
+      feedback: "The demanding schedule increased crew strain.",
     },
   ],
-
   science: [
     {
-      label: "Run a controlled experiment",
-      description: "Proceed with monitoring and a defined energy budget.",
-      effects: { power: -5, water: 2 },
+      action: "Run a monitored, limited experiment",
+      effects: { power: -4, water: 2 },
       score: 15,
-      feedback: "The controlled experiment produced useful mission data.",
+      feedback: "The controlled experiment returned useful data.",
     },
     {
-      label: "Scale down the experiment",
-      description: "Collect limited data while conserving resources.",
+      action: "Reduce the experiment's operating time",
       effects: { power: -2 },
       score: 8,
-      feedback: "A smaller experiment preserved more resources.",
+      feedback: "Scaling back preserved energy.",
     },
     {
-      label: "Run without safeguards",
-      description: "Proceed without the recommended limits.",
-      effects: { power: -10, oxygen: -2 },
+      action: "Run the experiment without limits",
+      effects: { power: -9, oxygen: -1 },
       score: -12,
-      feedback: "Uncontrolled operation increased resource pressure.",
+      feedback: "Uncontrolled operation placed extra pressure on resources.",
     },
   ],
-
   weather: [
     {
-      label: "Secure the outpost",
-      description: "Protect exposed equipment before conditions worsen.",
-      effects: { power: -5, shielding: 5 },
+      action: "Secure exposed equipment and shelter the crew",
+      effects: { power: -4, shielding: 4 },
       score: 15,
-      feedback: "The outpost was secured against the environmental threat.",
+      feedback: "Securing the outpost reduced environmental risk.",
     },
     {
-      label: "Reduce surface activity",
-      description: "Suspend nonessential work until conditions improve.",
-      effects: { power: 2, food: -2 },
+      action: "Suspend nonessential surface operations",
+      effects: { power: 2, food: -1 },
       score: 8,
-      feedback: "Reduced surface activity lowered immediate operational risk.",
+      feedback: "Reduced surface activity lowered immediate risk.",
     },
     {
-      label: "Continue surface operations",
-      description: "Keep working despite the warning.",
-      effects: { power: -8, shielding: -8 },
+      action: "Continue surface operations during the warning",
+      effects: { power: -7, shielding: -7 },
       score: -12,
-      feedback: "Exposed operations increased risk and resource loss.",
+      feedback: "Exposed operations increased resource and safety risks.",
     },
   ],
-
   logistics: [
     {
-      label: "Prioritize critical supplies",
-      description: "Allocate resources to essential mission requirements.",
-      effects: { water: 3, food: 3, power: -4 },
+      action: "Prioritize critical supplies and safety checks",
+      effects: { water: 3, food: 3, power: -3 },
       score: 15,
-      feedback: "Essential supplies were prioritized for the remaining mission.",
+      feedback: "Critical supplies received priority.",
     },
     {
-      label: "Replan the schedule",
-      description: "Delay lower-priority tasks and conserve supplies.",
-      effects: { power: 3, food: -2 },
+      action: "Replan the schedule around available resources",
+      effects: { power: 2, food: -1 },
       score: 8,
-      feedback: "The revised schedule reduced immediate resource pressure.",
+      feedback: "The revised schedule reduced immediate pressure.",
     },
     {
-      label: "Keep the original plan",
-      description: "Avoid changes to the current schedule.",
-      effects: { water: -4, food: -4 },
+      action: "Keep the existing plan without adjustments",
+      effects: { water: -3, food: -3 },
       score: -10,
-      feedback: "The original plan left the supply problem unresolved.",
+      feedback: "The unchanged plan left supply risks unresolved.",
     },
   ],
 };
@@ -330,23 +301,27 @@ function buildEvents(environment) {
       id,
       title,
       description,
+      type,
       severity: ["life", "radiation", "water"].includes(type)
         ? "critical"
         : "warning",
       day: index + 1,
-      choices: CHOICE_PROFILES[type].map((choice, choiceIndex) => ({
-        ...choice,
+      choices: STRATEGIES[type].map((strategy, choiceIndex) => ({
         id: `${id}-choice-${choiceIndex + 1}`,
-        effects: { ...choice.effects },
+        label: `${strategy.action}: ${title}`,
+        description: `${strategy.action} in response to ${title}.`,
+        effects: { ...strategy.effects },
+        score: strategy.score,
+        feedback: `${title}: ${strategy.feedback}`,
       })),
     })
   );
 }
 
-export const MOON_EVENTS = buildEvents("moon");
-export const MARS_EVENTS = buildEvents("mars");
-
-// Backward-compatible export for existing imports.
+// attachTask adds a 3D field task to events that have one (see missionTasks.js).
+// All other events are returned unchanged.
+export const MOON_EVENTS = buildEvents("moon").map(attachTask);
+export const MARS_EVENTS = buildEvents("mars").map(attachTask);
 export const MISSION_EVENTS = MOON_EVENTS;
 
 export const INITIAL_OBJECTIVES = [
@@ -360,7 +335,7 @@ export const INITIAL_OBJECTIVES = [
     id: "protect-crew",
     title: "Protect the crew",
     description:
-      "Keep water, food, oxygen and radiation shielding above zero throughout the campaign.",
+      "Keep water, food, oxygen and radiation shielding above zero.",
     completed: false,
   },
   {
@@ -384,45 +359,28 @@ function getEventsForMission(environment) {
   return environment === "mars" ? MARS_EVENTS : MOON_EVENTS;
 }
 
-// Any critical resource reaching 0% causes immediate mission failure.
 function hasCriticalFailure(resources) {
-  return (
-    resources.power <= 0 ||
-    resources.water <= 0 ||
-    resources.food <= 0 ||
-    resources.oxygen <= 0 ||
-    resources.shielding <= 0
+  return Object.keys(RESOURCE_META).some(
+    (resource) => resources[resource] <= 0
   );
 }
 
 function updateObjectives(state) {
+  const powerSafe = state.resources.power > 0;
+  const crewSafe = [
+    state.resources.water,
+    state.resources.food,
+    state.resources.oxygen,
+    state.resources.shielding,
+  ].every((value) => value > 0);
+
   return state.objectives.map((objective) => {
     if (objective.id === "stable-power") {
-      return {
-        ...objective,
-        // Do not show completed at mission start.
-        // Once play begins, this remains complete only while power is positive.
-        completed:
-          state.eventCount > 0 &&
-          state.resources.power > 0,
-      };
+      return { ...objective, completed: state.eventCount > 0 && powerSafe };
     }
 
     if (objective.id === "protect-crew") {
-      const crewResources = [
-        state.resources.water,
-        state.resources.food,
-        state.resources.oxygen,
-        state.resources.shielding,
-      ];
-
-      return {
-        ...objective,
-        // Do not show completed before the first decision.
-        completed:
-          state.eventCount > 0 &&
-          crewResources.every((value) => value > 0),
-      };
+      return { ...objective, completed: state.eventCount > 0 && crewSafe };
     }
 
     if (objective.id === "resolve-events") {
@@ -450,9 +408,8 @@ export function createMissionState(environment = "moon") {
     missionStatus: "active",
     currentEvent: events[0],
     resolvedEventIds: [],
-    // Keep all objectives unchecked at the start of a new mission.
-    objectives: INITIAL_OBJECTIVES.map((item) => ({
-      ...item,
+    objectives: INITIAL_OBJECTIVES.map((objective) => ({
+      ...objective,
       completed: false,
     })),
     flags: {},
@@ -468,71 +425,58 @@ export function resolveDecision(state, choiceId) {
 
   const event = state.currentEvent;
 
-  // Prevent resolving the same event twice.
   if (state.resolvedEventIds.includes(event.id)) {
     return state;
   }
 
   const choice = event.choices.find((item) => item.id === choiceId);
-
-  if (!choice) {
-    return state;
-  }
+  if (!choice) return state;
 
   const resources = { ...state.resources };
 
-  // Apply the selected decision's resource effects.
+  // Apply the selected decision's effects.
   for (const [resource, change] of Object.entries(choice.effects)) {
     if (resource in resources) {
       resources[resource] = clamp(resources[resource] + change);
     }
   }
 
-  // Apply daily resource consumption.
-  resources.power = clamp(resources.power - 1);
-  resources.water = clamp(resources.water - 1);
-  resources.food = clamp(resources.food - 1);
-  resources.oxygen = clamp(resources.oxygen - 1);
+  // Apply daily survival costs after the decision.
+  for (const [resource, cost] of Object.entries(DAILY_CONSUMPTION)) {
+    resources[resource] = clamp(resources[resource] - cost);
+  }
 
-  const resolvedEventIds = [...state.resolvedEventIds, event.id];
   const eventCount = state.eventCount + 1;
   const score = state.score + choice.score;
-  const duration = state.duration;
-  const events = getEventsForMission(state.environment);
-
-  const criticalFailure = hasCriticalFailure(resources);
+  const resolvedEventIds = [...state.resolvedEventIds, event.id];
 
   const updated = {
     ...state,
     score,
     resources,
-    flags: { ...state.flags, ...(choice.flags ?? {}) },
     eventCount,
     resolvedEventIds,
     currentEvent: null,
-    crewStatus: criticalFailure
-      ? "Critical"
-      : Math.min(
-          resources.power,
-          resources.water,
-          resources.food,
-          resources.oxygen,
-          resources.shielding
-        ) < 25
-        ? "At Risk"
-        : "Nominal",
-    missionStatus: criticalFailure ? "failed" : "active",
+    flags: { ...state.flags, ...(choice.flags ?? {}) },
+    crewStatus: "Nominal",
+    missionStatus: "active",
     log: [
       `${event.title}: ${choice.label}. ${choice.feedback}`,
       ...state.log,
     ].slice(0, 8),
   };
 
-  // Update objective states after applying this day's decision and resource costs.
+  updated.crewStatus = hasCriticalFailure(resources)
+    ? "Critical"
+    : Math.min(...Object.values(resources)) < 25
+      ? "At Risk"
+      : "Nominal";
+
   updated.objectives = updateObjectives(updated);
 
-  // Critical failure takes priority over campaign completion.
-  if (criticalFailure) {
+  // Any critical resource at 0% means immediate failure.
+  if (hasCriticalFailure(resources)) {
+    updated.missionStatus = "failed";
     updated.log = [
       "MISSION FAILED — A critical habitat resource reached 0%.",
       ...updated.log,
@@ -541,29 +485,34 @@ export function resolveDecision(state, choiceId) {
     return updated;
   }
 
-  // Decide success or failure after the final campaign event.
-  if (eventCount >= duration) {
+  // End-of-campaign validation.
+  if (eventCount >= state.duration) {
     const objectivesComplete = updated.objectives.every(
       (objective) => objective.completed
     );
 
     updated.missionStatus =
-      score > 0 && objectivesComplete ? "success" : "failed";
+      eventCount === state.duration &&
+      resolvedEventIds.length === state.duration &&
+      score > 0 &&
+      objectivesComplete
+        ? "success"
+        : "failed";
 
     updated.currentEvent = null;
-
     updated.log = [
       updated.missionStatus === "success"
-        ? `MISSION SUCCESS — All ${duration} mission events completed and all objectives achieved.`
-        : "MISSION FAILED — The campaign ended without meeting every objective or maintaining a positive score.",
+        ? `MISSION SUCCESS — All ${state.duration} events completed with all objectives achieved and a positive score.`
+        : "MISSION FAILED — The campaign ended without meeting every success condition.",
       ...updated.log,
     ].slice(0, 8);
 
     return updated;
   }
 
-  // Continue to the next unique event.
-  updated.day = state.day + 1;
+  // Advance exactly one day. Each event has a unique ID.
+  const events = getEventsForMission(state.environment);
+  updated.day = eventCount + 1;
   updated.currentEvent = events[eventCount];
 
   return updated;

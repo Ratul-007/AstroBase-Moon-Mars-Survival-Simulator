@@ -3,7 +3,65 @@
    GLOBAL BOX SIZING
 ========================= */
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+.audio-controls {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(125, 211, 252, 0.3);
+  border-radius: 12px;
+  background: rgba(5, 12, 30, 0.9);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+}
+
+.audio-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #eef4ff;
+  font-size: 0.82rem;
+}
+
+.audio-toggle:hover,
+.audio-toggle:focus-visible {
+  background: #162743;
+}
+
+.audio-volume {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #aebed6;
+  font-size: 0.75rem;
+}
+
+.audio-volume input {
+  width: 76px;
+  accent-color: #7dd3fc;
+}
+
+@media (max-width: 760px) {
+  .audio-controls {
+    right: 10px;
+    bottom: 10px;
+    max-width: calc(100vw - 20px);
+    overflow-x: auto;
+  }
+
+  .audio-toggle span,
+  .audio-volume span {
+    display: none;
+  }
+}
 
 *,
 *::before,
@@ -1552,10 +1610,11 @@
 
 .home-page .hero-text {
   max-width: 650px;
-  margin-top: 28px;
+  margin: 28px auto 0;
   color: #d0d9e7;
   font-size: clamp(1rem, 1.5vw, 1.12rem);
   line-height: 1.85;
+  text-align: center;
 }
 
 .home-page .hero-buttons {
@@ -1595,7 +1654,7 @@
 
 .home-page .hero-stats {
   width: min(720px, 100%);
-  margin-top: 62px;
+  margin: 62px auto 0;
   padding-top: 27px;
   border-top: 1px solid rgba(198, 218, 245, 0.23);
   gap: 0;
@@ -2420,7 +2479,7 @@
   }
 
   .home-page .hero-stats {
-    margin-top: 44px;
+    margin: 44px auto 0;
   }
 
   .home-page .mission-showcase,
@@ -2558,7 +2617,7 @@
   }
 
   .home-page .hero-stats {
-    margin-top: 38px;
+    margin: 38px auto 0;
     padding-top: 21px;
   }
 
@@ -4079,7 +4138,7 @@ button,
 input,
 textarea,
 select {
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font-body);
 }
 
 h1,
@@ -4088,7 +4147,7 @@ h3,
 h4,
 .hero-title,
 .section-heading h2 {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: -0.035em;
 }
@@ -4105,7 +4164,7 @@ a {
 .step-card-bottom,
 .systems-strip-title,
 .system-chip {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   letter-spacing: 0.06em;
 }
 
@@ -4138,7 +4197,7 @@ button,
   color: #dce7f5;
   border: 1px solid rgba(148, 180, 220, 0.35);
   border-radius: 8px;
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -4182,7 +4241,7 @@ button,
       transparent 48%
     ),
     var(--command-bg);
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font-body);
 }
 
 .mission-command-page *,
@@ -4220,7 +4279,7 @@ button,
   border: 1px solid rgba(145, 199, 255, 0.6);
   border-radius: 11px;
   color: var(--command-accent);
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: 24px;
   font-weight: 700;
 }
@@ -4231,7 +4290,7 @@ button,
 }
 
 .command-brand strong {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: 15px;
   letter-spacing: 0.12em;
 }
@@ -4239,7 +4298,7 @@ button,
 .command-brand small {
   margin-top: 5px;
   color: var(--command-muted);
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.07em;
 }
@@ -4251,7 +4310,7 @@ button,
   align-items: center;
   gap: 9px;
   color: #aabbd0;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 10px;
   letter-spacing: 0.08em;
 }
@@ -4279,7 +4338,7 @@ button,
   justify-content: center;
   gap: 12px;
   color: var(--command-accent);
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 11px;
   letter-spacing: 0.14em;
 }
@@ -4290,7 +4349,7 @@ button,
 
 .command-intro h1 {
   margin: 23px 0 16px;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(36px, 5.6vw, 68px);
   line-height: 1.08;
   font-weight: 600;
@@ -4316,7 +4375,7 @@ button,
   gap: 10px;
   margin-top: 27px;
   color: #7589a1;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.08em;
 }
@@ -4387,7 +4446,7 @@ button,
   background: rgba(5, 11, 20, 0.57);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 5px;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.08em;
   backdrop-filter: blur(8px);
@@ -4408,7 +4467,7 @@ button,
   top: 50%;
   left: 50%;
   color: rgba(255, 255, 255, 0.12);
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(44px, 7vw, 88px);
   font-weight: 700;
   letter-spacing: 0.16em;
@@ -4424,7 +4483,7 @@ button,
 .campaign-classification {
   margin: 0 0 10px;
   color: #b8d9ff;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 10px;
   letter-spacing: 0.14em;
 }
@@ -4432,7 +4491,7 @@ button,
 .campaign-title-block h2 {
   margin: 0;
   color: #fff;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(29px, 3.5vw, 43px);
   line-height: 1.1;
   font-weight: 600;
@@ -4442,7 +4501,7 @@ button,
 .campaign-subtitle {
   margin: 9px 0 0;
   color: #c5d3e2;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.11em;
 }
@@ -4485,7 +4544,7 @@ button,
 .campaign-spec span {
   margin-bottom: 8px;
   color: #7488a0;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 8px;
   letter-spacing: 0.06em;
 }
@@ -4521,7 +4580,7 @@ button,
 .campaign-objective div > span {
   margin-bottom: 5px;
   color: #839ab4;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 8px;
   letter-spacing: 0.08em;
 }
@@ -4538,7 +4597,7 @@ button,
 
 .hazards-label {
   color: #8395aa;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.09em;
 }
@@ -4571,7 +4630,7 @@ button,
   background: #a9d2ff;
   border: 1px solid #a9d2ff;
   border-radius: 6px;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.07em;
@@ -4629,14 +4688,14 @@ button,
 .protocol-heading p {
   margin: 0 0 5px;
   color: #8ca6c3;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 8px;
   letter-spacing: 0.08em;
 }
 
 .protocol-heading h2 {
   margin: 0;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: 15px;
   line-height: 1.4;
 }
@@ -4649,7 +4708,7 @@ button,
 
 .protocol-item > span {
   color: var(--command-accent);
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 11px;
 }
 
@@ -4686,7 +4745,7 @@ button,
   color: #9aadc3;
   background: transparent;
   border: 0;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 10px;
   letter-spacing: 0.07em;
   cursor: pointer;
@@ -4704,7 +4763,7 @@ button,
 .command-footer > p {
   margin: 0;
   color: #64768b;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 8px;
   line-height: 1.7;
   letter-spacing: 0.07em;
@@ -4850,7 +4909,7 @@ button,
   background:
     radial-gradient(ellipse at 80% 5%, rgba(48, 99, 151, 0.13), transparent 38%),
     var(--prelaunch-bg);
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font-body);
 }
 
 .prelaunch-page *,
@@ -4892,7 +4951,7 @@ button,
   border: 1px solid var(--prelaunch-accent);
   border-radius: 10px;
   color: var(--prelaunch-accent);
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: 23px;
   font-weight: 700;
 }
@@ -4903,7 +4962,7 @@ button,
 }
 
 .prelaunch-brand-copy strong {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: 14px;
   letter-spacing: 0.12em;
 }
@@ -4911,7 +4970,7 @@ button,
 .prelaunch-brand-copy small {
   margin-top: 5px;
   color: var(--prelaunch-muted);
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 8px;
   letter-spacing: 0.07em;
 }
@@ -4921,7 +4980,7 @@ button,
   align-items: center;
   gap: 9px;
   color: #a7b9ce;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.08em;
 }
@@ -4958,7 +5017,7 @@ button,
   flex-wrap: wrap;
   gap: 11px;
   color: #8da5c0;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.1em;
 }
@@ -4966,14 +5025,14 @@ button,
 .prelaunch-classification {
   margin: 34px 0 10px;
   color: var(--prelaunch-accent);
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 10px;
   letter-spacing: 0.15em;
 }
 
 .prelaunch-hero h1 {
   margin: 0;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(42px, 5vw, 67px);
   font-weight: 600;
   line-height: 1.05;
@@ -4983,7 +5042,7 @@ button,
 .prelaunch-subtitle {
   margin: 14px 0 0;
   color: #b7c8dc;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 10px;
   letter-spacing: 0.11em;
 }
@@ -5017,7 +5076,7 @@ button,
 .prelaunch-hero-meta span {
   margin-bottom: 7px;
   color: #8295ad;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 8px;
   letter-spacing: 0.07em;
 }
@@ -5162,7 +5221,7 @@ button,
 .prelaunch-eyebrow {
   margin: 0 0 9px;
   color: var(--prelaunch-accent);
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.12em;
 }
@@ -5170,7 +5229,7 @@ button,
 .prelaunch-section-heading h2,
 .prelaunch-launch-copy h2 {
   margin: 0;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(23px, 3vw, 31px);
   font-weight: 600;
   letter-spacing: -0.04em;
@@ -5178,7 +5237,7 @@ button,
 
 .prelaunch-section-code {
   color: #7589a1;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.07em;
   text-align: right;
@@ -5210,7 +5269,7 @@ button,
 .prelaunch-panel-label {
   margin: 2px 0 9px;
   color: #91a9c4;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.1em;
 }
@@ -5262,7 +5321,7 @@ button,
 
 .prelaunch-resource-status {
   color: #80d7a1;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 7px;
   letter-spacing: 0.04em;
 }
@@ -5285,7 +5344,7 @@ button,
 
 .prelaunch-resource-value strong {
   color: #edf4fc;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(23px, 2.4vw, 31px);
   font-weight: 600;
   letter-spacing: -0.04em;
@@ -5298,7 +5357,7 @@ button,
 
 .prelaunch-resource-unit {
   color: #64788f;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 7px;
   letter-spacing: 0.04em;
 }
@@ -5354,7 +5413,7 @@ button,
   display: block;
   margin-bottom: 3px;
   color: #f2c57f;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.07em;
 }
@@ -5433,7 +5492,7 @@ button,
 }
 
 .prelaunch-launch-text strong {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 11px;
   letter-spacing: 0.08em;
 }
@@ -5466,7 +5525,7 @@ button,
   color: #9aadc3;
   background: transparent;
   border: 0;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.07em;
   cursor: pointer;
@@ -5483,7 +5542,7 @@ button,
 
 .prelaunch-footer-status {
   color: #657b94;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-display);
   font-size: 8px;
   letter-spacing: 0.06em;
 }
@@ -5644,4 +5703,412 @@ button,
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ==================================================
+   ASTROBASE MISSION EXPERIENCE
+   Dashboard overlay + responsive mobile controls
+================================================== */
+
+.mission-dashboard-overlay {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 15;
+
+  width: min(520px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #405070 #0a1429;
+
+  border: 1px solid rgba(125, 211, 252, 0.2);
+  border-radius: 16px;
+  background: #070d1a;
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.4);
+  /* Blurring a live WebGL canvas during every scroll frame is expensive. */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  -webkit-overflow-scrolling: touch;
+  contain: layout paint;
+}
+
+.mission-dashboard-overlay::-webkit-scrollbar {
+  width: 7px;
+}
+
+.mission-dashboard-overlay::-webkit-scrollbar-track {
+  background: #0a1429;
+  border-radius: 10px;
+}
+
+.mission-dashboard-overlay::-webkit-scrollbar-thumb {
+  background: #405070;
+  border-radius: 10px;
+}
+
+.mission-dashboard-overlay .mission-dashboard {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 18px 14px;
+}
+
+/* Mobile toggle: hidden on desktop */
+.mobile-mission-toggle {
+  display: none;
+}
+
+/* Keep dashboard headings readable inside the overlay */
+.mission-dashboard-overlay h1,
+.mission-dashboard-overlay h2,
+.mission-dashboard-overlay h3 {
+  overflow-wrap: anywhere;
+}
+
+.mission-dashboard-overlay button {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  touch-action: manipulation;
+}
+
+/* Tablet and mobile */
+@media (max-width: 900px) {
+  .mission-dashboard-overlay {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 25;
+
+    width: min(460px, 100vw);
+    max-height: 100dvh;
+
+    border: 0;
+    border-left: 1px solid #263755;
+    border-radius: 0;
+    background: rgba(7, 13, 26, 0.97);
+
+    transform: translateX(105%);
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+      transform 0.28s ease,
+      visibility 0.28s ease;
+  }
+
+  .mission-dashboard-overlay.mobile-dashboard-open {
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .mission-dashboard-overlay .mission-dashboard {
+    padding: 76px 14px 24px;
+  }
+
+  .mobile-mission-toggle {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 35;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+
+    min-height: 46px;
+    padding: 0 16px;
+
+    border: 1px solid rgba(125, 211, 252, 0.5);
+    border-radius: 12px;
+    background: rgba(10, 20, 41, 0.96);
+    color: #eef4ff;
+
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    touch-action: manipulation;
+  }
+
+  .mobile-mission-toggle:hover {
+    background: #152641;
+  }
+
+  .mobile-mission-toggle:focus-visible {
+    outline: 2px solid #7dd3fc;
+    outline-offset: 3px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .mission-dashboard-overlay .mission-dashboard {
+    padding: 72px 12px 20px;
+  }
+
+  .mission-dashboard-overlay .dashboard-header {
+    align-items: flex-start;
+  }
+
+  .mission-dashboard-overlay h1 {
+    font-size: 1.65rem;
+  }
+
+  .mobile-mission-toggle {
+    top: 10px;
+    left: 10px;
+    min-height: 42px;
+    padding: 0 13px;
+  }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .mission-dashboard-overlay {
+    transition: none;
+  }
+}
+/* ==========================================
+   ASTROBASE — LOCAL NASA MOON / MARS IMAGES
+   Visual-only overrides. No gameplay changes.
+========================================== */
+
+/* HOME: Moon and Mars mission overview cards */
+.home-page .planet-card-art.moon-art,
+.home-page .planet-card-art.mars-art {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: #080e19;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+/* Local Moon image */
+.home-page .planet-card-art.moon-art {
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(5, 10, 20, 0.08) 0%,
+      rgba(5, 10, 20, 0.12) 42%,
+      rgba(5, 10, 20, 0.78) 100%
+    ),
+    url("/images/moon.webp");
+}
+
+/* Local Mars image */
+.home-page .planet-card-art.mars-art {
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(15, 7, 12, 0.08) 0%,
+      rgba(15, 7, 12, 0.12) 42%,
+      rgba(15, 7, 12, 0.80) 100%
+    ),
+    url("/images/mars.jpg");
+}
+
+/* Hide the old CSS-generated planet spheres */
+.home-page .planet-card-art .planet-orb {
+  display: none;
+}
+
+/* Hide the old artificial horizon; NASA imagery supplies the scenery */
+.home-page .planet-card-art .planet-horizon {
+  display: none;
+}
+
+/* Keep the card's number, coordinates and labels above the image */
+.home-page .planet-card-art .planet-number,
+.home-page .planet-card-art .planet-coordinate {
+  z-index: 2;
+}
+
+/* Preserve readability for any other text layered over the artwork */
+.home-page .planet-card-art > *:not(.planet-orb):not(.planet-horizon) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Responsive sizing remains compatible with the existing card layout */
+@media (max-width: 480px) {
+  .home-page .planet-card-art {
+    min-height: 220px;
+    background-position: center;
+    background-size: cover;
+  }
+}
+
+/* ==========================================
+   ABOUT SECTION
+   Keep the existing Earth/orbit illustration.
+   It is not Moon/Mars imagery.
+========================================== */
+
+/* Preserve the existing About visual and its animation */
+.home-page .about-visual-frame {
+  position: relative;
+  overflow: hidden;
+}
+
+/* ==========================================
+   MISSION SELECTION — NASA IMAGE BACKGROUNDS
+   The inline backgroundImage from MissionSelect
+   remains responsible for choosing Moon or Mars.
+========================================== */
+
+.campaign-landscape {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+html {
+  min-height: 100%;
+  background: #070720;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: transparent;
+}
+
+#root {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  background: transparent;
+}
+
+/* Main app content stays above the fixed background. */
+#root > *:not(.space-bg--fixed) {
+  position: relative;
+  z-index: 1;
+}
+/* ==========================================
+   SPACE BACKGROUND OVERRIDES
+   Paste at the VERY END of App.css (after the html/body/#root block).
+   Makes the page backgrounds transparent so the fixed
+   <SpaceBackground /> shows through. Hero video is untouched.
+========================================== */
+
+/* HOME */
+.home-page {
+  background: transparent;
+}
+
+.home-page .mission-showcase,
+.home-page .how-it-works {
+  background: transparent;
+}
+
+.home-page .footer {
+  background: rgba(3, 7, 16, 0.55);
+}
+
+/* MISSION SELECT (Choose your frontier) */
+.mission-command-page {
+  background: transparent;
+}
+
+/* PRE-LAUNCH (Moon Outpost / Mars Outpost) */
+.prelaunch-page {
+  background: transparent;
+}
+
+/* MISSION BRIEFING */
+.mission-briefing-page,
+.briefing-hero,
+.briefing-campaigns,
+.briefing-systems-section,
+.briefing-decision-section {
+  background: transparent;
+}
+
+.briefing-footer {
+  background: rgba(3, 7, 16, 0.55);
+}
+
+/* Older pages, in case any route still uses them */
+.mission-select,
+.mission-setup {
+  background: transparent;
+}
+/* ==========================================================
+   REAL NASA PLANET IMAGES (replaces CSS spheres + emoji planets)
+   Paste at the VERY END of App.css.
+
+   Images needed in  public/images/ :
+     earth.jpg        (Earth)
+     moon-globe.jpg   (Moon, full disk)
+     mars-globe.jpg   (Mars, full disk)
+   Tip: crop each one square, planet filling the frame.
+========================================================== */
+
+/* ---------- HOME: About section Earth ---------- */
+.home-page .about-earth {
+  background: url("/images/earth.jpg") center / cover no-repeat;
+}
+
+/* ---------- MISSION BRIEFING page ---------- */
+.briefing-planet-moon {
+  background: url("/images/moon-globe.jpg") center / cover no-repeat;
+}
+
+.briefing-card-planet-moon {
+  background: url("/images/moonglobe.jpg") center / cover no-repeat;
+}
+
+.briefing-planet-mars,
+.briefing-card-planet-mars {
+  background: url("/images/mars-globe.jpg") center / cover no-repeat;
+}
+
+/* ---------- PRE-LAUNCH page (Moon / Mars Outpost) ---------- */
+/* font-size: 0 hides the old emoji planet; the image replaces it */
+.prelaunch-planet {
+  border-radius: 50%;
+  font-size: 0;
+  line-height: 0;
+  color: transparent;
+  background: url("/images/moonglobe.jpg") center / cover no-repeat;
+  box-shadow:
+    inset -24px -14px 40px rgba(0, 0, 0, 0.45),
+    0 0 60px rgba(130, 180, 232, 0.18);
+  filter: none;
+}
+
+.prelaunch-mars .prelaunch-planet {
+  background-image: url("/images/mars-globe.jpg");
+  box-shadow:
+    inset -24px -14px 40px rgba(0, 0, 0, 0.45),
+    0 0 60px rgba(242, 129, 94, 0.18);
+  filter: none;
+}
+
+/* ---------- MISSION SELECT cards ----------
+   The inline photos are real NASA images but not Moon/Mars
+   (Earth + ISS, shuttle launch). This swaps in the Moon/Mars
+   surface photos you already have. Delete this block if you
+   prefer to edit MissionSelect.jsx instead. */
+.campaign-card:nth-child(1) .campaign-landscape {
+  background-image:
+    linear-gradient(180deg, rgba(5, 10, 20, 0.1) 0%, rgba(5, 10, 20, 0.75) 100%),
+    url("/images/moon.webp") !important;
+}
+
+.campaign-card:nth-child(2) .campaign-landscape {
+  background-image:
+    linear-gradient(180deg, rgba(15, 7, 12, 0.1) 0%, rgba(15, 7, 12, 0.78) 100%),
+    url("/images/mars.jpg") !important;
 }
