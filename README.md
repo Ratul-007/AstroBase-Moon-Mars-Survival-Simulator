@@ -117,16 +117,17 @@ NOVA helps players with:
 
 ## 👨‍🚀 Meet the AstroBase Team
 
-AstroBase is developed by a multidisciplinary team combining game development, software engineering, artificial intelligence, space research, and creative storytelling.
+AstroBase is developed by a multidisciplinary team combining game development, software engineering, artificial intelligence, space research, design, and creative storytelling.
 
 | Team Member | Role | Responsibilities |
 |---|---|---|
 | **Ratul** | 🎨 Frontend Developer, UI/UX Designer & Game Logic Developer | Leads frontend development, user interface and experience design, 3D gameplay integration, mission mechanics, resource management, survival systems, and scoring logic. |
-| **Ratul** | 🤖 Lead AI & Backend Developer | Leads NOVA AI development, backend architecture, API integration, and AI-powered mission assistance. |
-| **Sadman** | 🔗 AI, Backend & Integration Contributor | Supports AI development, backend integration, API connectivity, and overall system integration. |
+| **Sadman** | 🤖 Lead AI & Backend Developer | Leads NOVA AI development, backend architecture, API integration, and AI-powered mission assistance. |
+| **Ratul** | 🔗 AI, Backend & Integration Contributor | Supports AI development, backend integration, API connectivity, and overall system integration. |
 | **Shahid** | 🔬 NASA Research & Content Specialist | Conducts space science research and contributes Moon/Mars mission information and educational content. |
 | **Prabak** | 🔬 NASA Research & Content Specialist | Supports NASA-related research, scientific information gathering, and educational content development. |
 | **Aryan** | 🎬 Video Animator & Presenter | Handles project video animation, visual storytelling, presentation materials, and project demonstration. |
+| **Mifta** | 🎨 Designer | Contributes to the visual design and creative presentation of AstroBase. |
 
 <p align="center">
   <b>🚀 One Team. One Mission. Beyond Earth.</b>
