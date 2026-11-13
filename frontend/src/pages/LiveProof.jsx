@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./LiveProof.css";
+import "./Liveproof.css";
 
 // Put VITE_NASA_API_KEY=your_key in frontend/.env (free key: https://api.nasa.gov)
 const NASA_KEY = import.meta.env.VITE_NASA_API_KEY || "DEMO_KEY";
