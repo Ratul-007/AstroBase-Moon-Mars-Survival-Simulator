@@ -11,7 +11,7 @@ export const loadLaunchGate = () =>
   import("./launch/LaunchGate.jsx");
 
 export const loadLiveProof = () =>
-  import("./pages/Liveproof.jsx");
+  import("./pages/LiveProof.jsx");
 
 export const loadMissionCertificatePage = () =>
   import("./pages/MissionCertificatePage.jsx");
