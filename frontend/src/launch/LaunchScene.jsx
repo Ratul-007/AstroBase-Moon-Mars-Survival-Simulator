@@ -1,4 +1,5 @@
 import {
+  Suspense,
   forwardRef,
   memo,
   useEffect,
@@ -647,7 +648,36 @@ function LaunchWorld({ cfg, onHud, onFinish, onReady, fadeRef, barRef }) {
         <Puffs ref={dustRef} count={110} color={cfg.landing.dust} opacity={0.45} />
       </group>
 
-      <Rocket ref={rocketRef} flameRef={flameRef} accent={cfg.accent} />
+      <Suspense
+        fallback={
+          <group ref={rocketRef}>
+            <mesh position={[0, 3.5, 0]}>
+              <cylinderGeometry args={[0.42, 0.42, 6, 16]} />
+              <meshStandardMaterial color="#d9e0e8" metalness={0.55} roughness={0.35} />
+            </mesh>
+            <mesh position={[0, 6.65, 0]}>
+              <coneGeometry args={[0.42, 1.3, 16]} />
+              <meshStandardMaterial color="#ef4444" metalness={0.35} roughness={0.4} />
+            </mesh>
+            <mesh position={[0, 0.65, 0]}>
+              <coneGeometry args={[0.72, 1.3, 4]} />
+              <meshStandardMaterial color="#9ca3af" metalness={0.6} roughness={0.4} />
+            </mesh>
+            <group ref={flameRef} position={[0, -0.35, 0]} visible={false}>
+              <mesh position={[0, -1.3, 0]} rotation={[Math.PI, 0, 0]}>
+                <coneGeometry args={[0.55, 2.6, 18]} />
+                <meshBasicMaterial color="#ff8a2a" transparent opacity={0.85} depthWrite={false} />
+              </mesh>
+              <mesh position={[0, -0.95, 0]} rotation={[Math.PI, 0, 0]}>
+                <coneGeometry args={[0.3, 1.9, 14]} />
+                <meshBasicMaterial color="#fff2b0" transparent opacity={0.95} depthWrite={false} />
+              </mesh>
+            </group>
+          </group>
+        }
+      >
+        <Rocket ref={rocketRef} flameRef={flameRef} accent={cfg.accent} />
+      </Suspense>
     </>
   );
 }
